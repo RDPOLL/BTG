@@ -26,7 +26,7 @@ void ili9341_spi_init(void)//set spi speed and settings
 DDRB |=  (1<<PB4) | (1<<PB5) | (1<<PB7);//CS,SS,MOSI,SCK as output(although SS will be unused throughout the program)
 DDRB &= ~(1<<PB6);
 SPCR=(1<<SPE) | (1<<MSTR) | (1<<SPR0);//mode 0,fosc/4
-//SPSR |=(1<<SPI2X);//doubling spi speed.i.e final spi speed-fosc/2
+SPSR |=(1<<SPI2X);//doubling spi speed.i.e final spi speed-fosc/2
 PORTD |= (1<<PD2);//cs off during startup
 
 }

@@ -617,8 +617,7 @@ piezo = eeprom_read_word((uint16_t *) 4);
 		  int fc[]={CYAN,BLACK,BLACK,BLACK};
 		  int bg[]={BLACK,GREEN,RED,CYAN};
 		    KA = eeprom_read_word((uint16_t*)8);
-		    KA=20;
-       		    print_at_lcd(10,220,fc[background],bg[background],2,"KW%d %d\n",100, KA);
+       		print_at_lcd(10,220,fc[background],bg[background],2,"KW%d\n",KA);
 		    YEAR = eeprom_read_word((uint16_t*)12);							  
 		    print_at_lcd(205,220,fc[background],bg[background],2,"Jahr:%d\n",YEAR);
 
