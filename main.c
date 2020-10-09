@@ -612,8 +612,7 @@ piezo = eeprom_read_word((uint16_t *) 4);
 		printf("%s\n", Testausgabe);*/		
 		
 /////////////////Hintergrundfarbe mit Datum abstimmen///////////////////
-		// This do all the stuff as the uncommented stuff below just with few lines ;)
-		{
+
 		  int fc[]={CYAN,BLACK,BLACK,BLACK};
 		  int bg[]={BLACK,GREEN,RED,CYAN};
 		    KA = eeprom_read_word((uint16_t*)8);
@@ -621,7 +620,6 @@ piezo = eeprom_read_word((uint16_t *) 4);
 		    YEAR = eeprom_read_word((uint16_t*)12);							  
 		    print_at_lcd(205,220,fc[background],bg[background],2,"Jahr:%d\n",YEAR);
 
-		}
 
 		
 ////////////////////////////////////////////////////////////////////////
