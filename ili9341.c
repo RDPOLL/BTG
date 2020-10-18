@@ -25,7 +25,7 @@ void ili9341_spi_init(void)//set spi speed and settings
 {
 DDRB |=  (1<<PB4) | (1<<PB5) | (1<<PB7);//CS,SS,MOSI,SCK as output(although SS will be unused throughout the program)
 DDRB &= ~(1<<PB6);
-SPCR=(1<<SPE) | (1<<MSTR) | (1<<SPR0);//mode 0,fosc/4
+ SPCR=(1<<SPE) | (1<<MSTR);// | (1<<SPR0);//mode 0,fosc/4
 SPSR |=(1<<SPI2X);//doubling spi speed.i.e final spi speed-fosc/2
 PORTD |= (1<<PD2);//cs off during startup
 
@@ -42,7 +42,7 @@ while(!(SPSR & (1<<SPIF)));//wait till the transmission is finished
 void ili9341_writecommand8(uint8_t com)//command write
 {
 controlport &=~((1<<dc)|(1<<cs));//dc and cs both low to send command
-_delay_us(5);//little delay
+//_delay_us(5);//little delay
 ili9341_spi_send(com);
 controlport |=(1<<cs);//pull high cs
 }
@@ -51,7 +51,7 @@ controlport |=(1<<cs);//pull high cs
 void ili9341_writedata8(uint8_t data)//data write
 {
 controlport |=(1<<dc);//st dc high for data
-_delay_us(1);//delay
+//_delay_us(1);//delay
 controlport &=~(1<<cs);//set cs low for operation
 ili9341_spi_send(data);
 controlport |=(1<<cs);
@@ -447,13 +447,13 @@ void ili9341_fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornern
 void ili9341_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) 
 {
   // Update in subclasses if desired!
-  ili9341_drawLine(x, y, x, y+h-1, color);
+  ili9341_drawvline(x, y, y+h-1, color);
 }
 
 void ili9341_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) 
 {
   // Update in subclasses if desired!
-  ili9341_drawLine(x, y, x+w-1, y, color);
+  ili9341_drawhline(x, y, x+w-1,  color);
 }
 
 
