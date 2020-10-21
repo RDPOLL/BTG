@@ -46,7 +46,9 @@
 #define PINK        0xF81F
 
 
-#define LCD_RGB(r,g,b) ( (r&0x1f)<<11 | (g&0x3f)<<5| (b &0x1f))
+//#define LCD_RGB(r,g,b) ( (r&0x1f)<<11 | (g&0x3f)<<5| (b &0x1f))
+#define LCD_RGB( _r_,_g_,_b_) (((((unsigned int)(_r_))&0xF8)<<8)|((((unsigned int)(_g_))&0xFC)<<3)|(((unsigned int)(_b_))>>3))
+//#define LCD_RGB( _r_,_g_,_b_) (((((unsigned int)(_r_))&0x1f)<<11)|((((unsigned int)(_g_))&63)<<5)|(((unsigned int)(_b_))&0x1f))
 
 
 

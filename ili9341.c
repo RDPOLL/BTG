@@ -154,7 +154,7 @@ ili9341_writedata8(0x48);
 
 //pixel format
 ili9341_writecommand8(0x3A);
-ili9341_writedata8(0x55);
+ili9341_writedata8(0x5);
 
 //frameration control,normal mode full colours
 ili9341_writecommand8(0xB1);

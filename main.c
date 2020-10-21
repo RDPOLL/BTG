@@ -510,11 +510,11 @@ void print_at_lcd(int x, int y, int fc, int bc, int fs, const char * fmt, ...)
 // draw sunken box ala windows 
 void draw_box(int x,int y , int sx, int sy, int len , int flag)
 {
-  int lcolor1=(flag==1)?LCD_RGB(0x10,0x10,0x10):LCD_RGB(0x18,0x18,0x18);
-  int lcolor2=(flag==1)?LCD_RGB(0x18,0x18,0x18):LCD_RGB(0x10,0x10,0x10);
+  int lcolor1=(flag==1)?LCD_RGB(0x70,0x70,0x70):LCD_RGB(0xf0,0xf0,0xf0);
+  int lcolor2=(flag==1)?LCD_RGB(0xf0,0xf0,0xf0):LCD_RGB(0x70,0x70,0x70);
   int a;
   
-  ili9341_fillrect(x+len,y+len,sx-(2*len),sy-(2*len),LCD_RGB(0x8,0x8,0x8));
+  ili9341_fillrect(x+len,y+len,sx-(2*len),sy-(2*len),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80));
   for(a=0;a<=len;a++)
     {
       ili9341_drawhline(x+a,y+a,sx-(2*a),lcolor1);
@@ -526,6 +526,32 @@ void draw_box(int x,int y , int sx, int sy, int len , int flag)
   
 }
 
+void draw_button(int x, int y, int sx, int sy, int len ,int flag, char * text)
+{
+ draw_box(x,y,sx,sy,len,flag);
+ print_at_lcd(x+len+15, y+len + (sy/2) - 4, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),1,text);
+}
+
+long map(long x, long in_min, long in_max, long out_min, long out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void draw_progress(int x, int y, int sx, int sy, int len, int prog)
+{
+ int a,mlen=sx-(2*len)-6;
+
+ draw_box(x,y,sx,sy,len,0);
+ for(a=0;a<(sy-(2*len)-6);a++)
+  {
+   ili9341_drawhline(x+len+3,y+len+3+a,map(prog,0,100,0,mlen),LCD_RGB(0xf0,0,0)); 
+    
+
+  }
+ 
+
+}
+ 
+ 
 void ENTER_Flankenerkennung(void)
 {
 	static char old_level = 0;
@@ -650,7 +676,7 @@ piezo = eeprom_read_word((uint16_t *) 4);
 	ili9341_settextcolour(YELLOW,LCD_RGB(16,16,16));
 	ili9341_settextsize(2.4);
 
-	ili9341_fillRect(0,0,_width,_height,LCD_RGB(0x3f,0x3f,0x3f));
+	ili9341_fillRect(0,0,_width,_height,LCD_RGB(0x0,0x0,0x0));
 	
 	ili9341_setcursor(130,160);
 	printf("created by:");
@@ -678,13 +704,18 @@ piezo = eeprom_read_word((uint16_t *) 4);
 		  int bg[]={BLACK,GREEN,RED,CYAN};
 		    KA = eeprom_read_word((uint16_t*)8);
 		   
-       		    print_at_lcd(10,220,fc[background],bg[background],2,"KW%d %d\n", KA);
+       		    print_at_lcd(10,220,fc[background],bg[background],1,"KW%d %d\n", KA);
 		    YEAR = eeprom_read_word((uint16_t*)12);							  
 		    print_at_lcd(205,220,fc[background],bg[background],2,"Jahr:%d\n",YEAR);
 
 		}
 
-		draw_box(10,30,150,30,3,0);
+		//draw_box(10,30,150,40,2,0);
+		//draw_box(10,80,150,40,2,1);
+		draw_button(10, 10 , 150 , 40 , 2 , 0 , "Hallo Lucas ");
+		draw_button(10, 60 , 150 , 40 , 2 , 1 , "Was meinst? ");
+		for(int a=0;a<100;a++)
+		draw_progress(10,110,150,40,2,a);
 		for(;;);
 
 	}
