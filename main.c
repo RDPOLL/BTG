@@ -1,18 +1,20 @@
-#define F_CPU 			16000000UL
+
 
 #include <avr/io.h>
+#include <avr/pgmspace.h>
+#include <avr/eeprom.h>
+#include <util/delay.h>
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <inttypes.h>
 #include "ili9341.h"
-#include <avr/eeprom.h>
 #include "ili9341gfx.h"
-#include "adc.c"
+#include "adc.h"
 #include "I2C.h"
-#include <avr/pgmspace.h>
-#include <util/delay.h>
+
 
 /* 
 Hmmm... Dies sollte in ein include File ... Den andere Module brauchen dies evtl. auch, nicht nur main.c
@@ -52,7 +54,7 @@ char string[10]={0};
 
 ////////////////////////////////////////////////////////////////////////
 
-void messInit()
+void messInit(void )
 {
 	ADC_init(0x18);				//AD0 und AD1 einschalten
 //----PWM Init------------------------------------
@@ -159,7 +161,7 @@ void draw_progress(int x, int y, int sx, int sy, int len, int prog)
 
 int main(void)
 {
-	unsigned char output[20];
+	char output[20];
 	unsigned short volt = 0;
 	
 	DDRD |= (1<<PD5);													//

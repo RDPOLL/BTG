@@ -1,3 +1,13 @@
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#include <avr/eeprom.h>
+#include <util/delay.h>
+
+
+#include <stdlib.h>
+#include <inttypes.h>
+
+
 /*
  *		This Libary is used to Initialise and read the ADC
  * 		of the atmega1284p. For Register discription use the Datasheet
@@ -7,6 +17,7 @@
  * 		volt = ((long)adc_value * 10000) / 2046;
  * 		
  */
+
 
 void ADC_init(uint8_t channel)
 {

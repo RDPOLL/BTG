@@ -1,9 +1,10 @@
-#define F_CPU 16000000UL
-#include "ili9341.h"
+
+
 #include <avr/io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <util/delay.h>
+#include "ili9341.h"
 
 volatile uint16_t LCD_W=ILI9341_TFTWIDTH;
 volatile uint16_t LCD_H=ILI9341_TFTHEIGHT;
