@@ -14,6 +14,10 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 
+/* 
+Hmmm... Dies sollte in ein include File ... Den andere Module brauchen dies evtl. auch, nicht nur main.c
+*/
+
 #define LED_ROT_ON		PORTB |= (1<<PB2)
 #define LED_ROT_OFF		PORTB &= ~(1<<PB2)
 #define LED_GRUN_ON		PORTB |= (1<<PB3)
