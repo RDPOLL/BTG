@@ -39,7 +39,7 @@ MCU = atmega644p
 FORMAT = ihex
 TARGET = main
 #SRC = $(TARGET).c ili9341.c ili9341gfx.c ADC.c I2C.c sd_raw.c uart.c fat.c partition.c byteordering.c
-SRC = $(TARGET).c ili9341.c ili9341gfx.c ADC.c I2C.c uart.c
+SRC = $(TARGET).c ili9341.c ili9341gfx.c I2C.c uart.c
 ASRC =
 OPT = s
 
