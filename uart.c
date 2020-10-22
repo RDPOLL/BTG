@@ -58,7 +58,7 @@
 #endif
 #endif
 
-#define F_CPU 8000000UL                 // set the CPU clock
+
 #define BAUD 9600UL
 #define UBRRVAL (F_CPU/(BAUD*8)-1)
 #define USE_SLEEP 1
