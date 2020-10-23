@@ -149,7 +149,7 @@ void draw_progress(int x, int y, int sx, int sy, int len, int prog)
  draw_box(x,y,sx,sy,len,0);
  for(a=0;a<(sy-(2*len)-6);a++)
   {
-   ili9341_drawhline(x+len+3,y+len+3+a,map(prog,0,100,0,mlen),LCD_RGB(0xf0,0,0)); 
+   ili9341_drawhline(x+len+3,y+len+3+a,map(prog,0,100,0,mlen),LCD_RGB(0xf0,0,0));
   }
 }
 
