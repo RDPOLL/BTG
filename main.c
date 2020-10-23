@@ -1,10 +1,7 @@
-
-
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <util/delay.h>
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -13,7 +10,6 @@
 #include "ili9341.h"
 #include "ili9341gfx.h"
 #include "adc.h"
-#include "I2C.h"
 
 
 /* 
@@ -31,8 +27,8 @@ Hmmm... Dies sollte in ein include File ... Den andere Module brauchen dies evtl
 #define LED_BAT_ON		PORTD |= (1<<PD0)
 #define LED_BAT_OFF		PORTD &= ~(1<<PD0)
 
-#define linearOffset 7		//Offset in mA
-#define gainOffset 1510		//Faktor 916 sollte ok sein
+#define linearOffset 0		//Offset in mA
+#define gainOffset 280
 
 extern uint16_t _width ;
 extern uint16_t _height;
@@ -216,10 +212,10 @@ int main(void)
 	TRANSISTOR_OFF;															//Ton ausschalten / nur beim Programmieren notwenig
 	piezo = eeprom_read_word((uint16_t *) 4);					
 		
-	print_at_lcd(130,180,YELLOW, BLACK,2, "RUAG Schweiz AG");
+	print_at_lcd(130, 180, YELLOW, BLACK, 2, "RUAG Schweiz AG");
 
-////////////////////////////////////////////////////////////////////////
-//////////////////////////Endlosschleife//////////////////////////////////////////////
+
+//////////////////////////Endlosschleife////////////////////////////////
 	
 	while(1)  
 	{	
@@ -233,9 +229,8 @@ int main(void)
 
 		volt = setLast_readVolt(0);
 			
-		draw_button(10, 10 , 150 , 40 , 2 , 0 , "Hallo Lucas ");
+		draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
 		sprintf(output, "%05d", volt);
 		draw_button(10, 60 , 150 , 40 , 2 , 1 , output);
-
 	}
 }
