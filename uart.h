@@ -33,7 +33,8 @@ void uart_puts(const char* str);
 void uart_puts_p(PGM_P str);
 
 uint8_t uart_getc(void);
-
+  int16_t uart_putchar_printf(char var, FILE *stream);
+  
 #ifdef __cplusplus
 }
 #endif

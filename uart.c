@@ -59,8 +59,8 @@
 #endif
 
 
-#define BAUD 9600UL
-#define UBRRVAL (F_CPU/(BAUD*8)-1)
+#define BAUD 19200UL
+#define UBRRVAL (F_CPU/(BAUD*16)-1)
 #define USE_SLEEP 1
 
 void uart_init()
@@ -89,6 +89,15 @@ void uart_putc(uint8_t c)
     /* send next byte */
     UDR = c;
 }
+
+
+int16_t uart_putchar_printf(char var, FILE *stream)//this function will be called whenever printf is used
+{
+  uart_putc(var);
+	return 1;
+}
+
+
 
 void uart_putc_hex(uint8_t b)
 {

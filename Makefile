@@ -62,7 +62,7 @@ CSTANDARD = -std=gnu99
 CDEFS = -DF_CPU=16000000UL 
 
 # Place -I options here
-CINCS =
+CINCS = -Ifatfs
 
 
 CDEBUG = -g$(DEBUG)
@@ -108,7 +108,7 @@ MATH_LIB = -lm
 EXTMEMOPTS =
 
 #LDMAP = $(LDFLAGS) -Wl,-Map=$(TARGET).map,--cref
-LDFLAGS = $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
+LDFLAGS = fatfs/obj_mmc/ff.o  fatfs/obj_mmc/ffunicode_avr.o fatfs/obj_mmc/diskio.o fatfs/obj_mmc/mmc_avr_spi.o $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 
 
 # Programming support using avrdude. Settings and variables.
