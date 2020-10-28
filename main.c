@@ -46,7 +46,7 @@ static const unsigned char logo_bits[] PROGMEM = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x1f, 0x10, 0x00, 0x00 };
 
 
-
+#define BACK_GRAY (LCD_RGB(32,32,32))
 
 
 /* 
@@ -65,7 +65,8 @@ Hmmm... Dies sollte in ein include File ... Den andere Module brauchen dies evtl
 #define LED_BAT_OFF		PORTD &= ~(1<<PD0)
 
 #define linearOffset 0		//Offset in mA
-#define gainOffset 280
+#define gainOffset 260
+// Original 280
 
 extern uint16_t _width ;
 extern uint16_t _height;
@@ -98,6 +99,7 @@ void messInit(void )
 //------------------------------------------------
 }
 
+#if 0
 unsigned short setLast_readVolt(unsigned short sollStrom)
 {
 		unsigned short istStrom = 0;
@@ -113,7 +115,9 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
 		}
 		istStrom /= 10;
 
-		istStrom += linearOffset;							//Offset des ADC kompensieren
+		istStrom += linearOffset;
+		
+		//Offset des ADC kompensieren
 		
 //Spannung wird gemessen		
 //--------------------------------------------------------------
@@ -128,17 +132,62 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
 		if((istStrom < sollStrom) && (pwm < 255))
 		{
 			if(pwm == 0)
-				pwm = 130;
+			  pwm = 150+(sollStrom/3);
 			pwm++;
 		}
 		if((istStrom > sollStrom) && (pwm > 0)) pwm--;
 		if(sollStrom == 0) pwm = 0;
 //--------------------------------------------------------------
+		printf("%s ist %d soll: %d pwm: %d volt: %d\n",__FUNCTION__,istStrom,sollStrom,pwm, volt);
 
 		OCR2B = pwm;
 
 		return volt;
 }
+
+#else
+unsigned short setLast_readVolt(unsigned short sollStrom)
+{
+  unsigned int volt, cur;
+  unsigned int adc1,adc2;
+  int a,i;
+
+  pwm=(sollStrom/3)+150;
+  _delay_ms(100);
+  //OCR2B=0;
+  adc1=read_ADC(3);
+  if(adc1>0) volt=(adc1*29)+170;
+  adc2=read_ADC(4);
+  if(adc2 >0) cur= (adc2*3200/1000)+13;
+  //printf("%s: adc1: %d adc2: %d volt: %d cur: %d \n",__FUNCTION__,adc1,adc2,volt,cur);
+
+  OCR2B=(pwm);
+  _delay_ms(200);
+  for(a=0;a<15;a++){
+    cur=0;
+    for(i=0;i<10;i++) {
+      adc2=read_ADC(4);
+      if(adc2 >0) cur+= ((long)adc2*3200/1000)+13; else cur+=0;
+    }
+    cur/=10;
+    
+     if((cur+1) < sollStrom) pwm ++;
+     if((cur-1) > sollStrom) pwm --;
+     OCR2B=pwm;
+     _delay_ms(200);   //stabilize pwm and current meassure
+     printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
+  }
+
+  adc1=read_ADC(3);
+  if(adc1>0) volt=(adc1*29)+170; else volt =0;
+
+  pwm=0;
+  
+  return volt;
+}
+
+#endif
+
 
 void print_at_lcd(int x, int y, int fc, int bc, int fs, const char * fmt, ...)
 {
@@ -310,7 +359,7 @@ int main(void)
 	
 	stdout = &mydata2;
 	ili9341_init();														//initial driver setup to drive ili9341
-	ili9341_clear(LCD_RGB(32,32,32));												//fill screen with black colour
+	ili9341_clear(BACK_GRAY);												//fill screen with black colour
 	//_delay_ms(1000);
 	ili9341_setRotation(3);												//rotate screen
 	_delay_ms(2);
@@ -322,8 +371,8 @@ int main(void)
 	TRANSISTOR_OFF;															//Ton ausschalten / nur beim Programmieren notwenig
 	piezo = eeprom_read_word((uint16_t *) 4);					
 		
-	print_at_lcd(130, 180, YELLOW, BLACK, 2, "RUAG Schweiz AG");
-	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,1,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
+	print_at_lcd(130, 180, YELLOW, BACK_GRAY, 2, "RUAG Schweiz AG");
+	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,5,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
 
 
 	  f_mount(&fs, "", 0);
@@ -347,17 +396,17 @@ int main(void)
 	while(1)  
 	{	
 		int fc[]={CYAN,BLACK,BLACK,BLACK};
-		int bg[]={BLACK,GREEN,RED,CYAN};
+		int bg[]={BACK_GRAY,GREEN,RED,CYAN};
 		//KA = eeprom_read_word((uint16_t*)8);
 		   
 		print_at_lcd(10,220,fc[background], bg[background],1, "User:%s KW%d \n",user_name, KW);
 		//YEAR = eeprom_read_word((uint16_t*)12);							  
 		print_at_lcd(205,220,fc[background], bg[background],2, "Jahr:%d\n", YEAR);
 
-		volt = setLast_readVolt(0);
+		volt = setLast_readVolt(100);
 			
 		draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
-		sprintf(output, "%05d V", volt);
+		sprintf(output, "%2d.%03d V", volt/1000,(volt%1000));
 		draw_button(10, 60 , 150 , 40 , 2 , 1 , output);
 		//print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
 	}
