@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <string.h>
 #include "ili9341.h"
 #include "ili9341gfx.h"
 #include "adc.h"
@@ -72,6 +73,9 @@ extern uint16_t _width ;
 extern uint16_t _height;
 
 unsigned short pwm = 0;
+unsigned short pwm_offset=150;
+unsigned char piezo=0;     // Lautsprecher ein-/ausschalten (PIEZO-Summer)
+unsigned char debug=0;     // if >0 show debug infos @serial
 
 uint16_t KA = 0;
 uint16_t KW = 0;
@@ -79,7 +83,8 @@ uint16_t Jahr = 0;
 uint16_t YEAR = 0;
 char *user_name;
 uint8_t	 background = 0;	
-uint8_t	 piezo;				// Lautsprecher ein-/ausschalten (PIEZO-Summer)
+
+
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -152,7 +157,7 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
   unsigned int adc1,adc2;
   int a,i;
 
-  pwm=(sollStrom/3)+150;
+  pwm=(sollStrom/3) + pwm_offset;
   _delay_ms(100);
   //OCR2B=0;
   adc1=read_ADC(3);
@@ -175,7 +180,7 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
      if((cur-1) > sollStrom) pwm --;
      OCR2B=pwm;
      _delay_ms(200);   //stabilize pwm and current meassure
-     printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
+     if(debug > 1 ) printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
   }
 
   adc1=read_ADC(3);
@@ -260,7 +265,21 @@ ISR(TIMER0_COMPA_vect)
 Read the "read.ini" file, with the configuration for the tester 
 return 0 if everything was ok, otherwise -1
 
- */
+read.ini file has follow structure :
+"variable" = "value"
+
+"variable" is a predefined variable, "value" is an assosiated value with the variable, such as "year" current year, "week" current week number. 
+lines starting with "#" are ignored (comment)
+
+Following variable are defined :
+year = [integer number]
+week = [integer number]
+name = [string]
+pwm_offset = [integer number]
+
+
+
+*/
 
 
 int read_ini()
@@ -281,7 +300,10 @@ int read_ini()
       if(strcmp(cmd,"week")==0) KW=atoi(var);
       if(strcmp(cmd,"year")==0) YEAR=atoi(var);
       if(strcmp(cmd,"name")==0) user_name=strdup(var);
-
+      if(strcmp(cmd,"pwm_offset")==0) pwm_offset=atoi(var);
+      if(strcmp(cmd,"piezo")==0) piezo=atoi(var);
+      if(strcmp(cmd,"debug")==0) debug=atoi(var);
+      
     }
   f_close(&file);
   return 0;
