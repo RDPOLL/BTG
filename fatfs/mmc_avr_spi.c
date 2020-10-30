@@ -25,7 +25,7 @@
 #define	FCLK_SLOW()     SPSR |= ((1<<SPR1) | (1<<SPR0))  //doubling spi speed.i.e final spi speed-fosc/2		/* Set SPI clock for initialization (100-400kHz) */
 #define	FCLK_FAST()	do { SPSR &= ~((1<<SPR1) | (1<<SPR0))	; SPSR |=(1<<SPI2X); } while (0)				/* Set SPI clock for read/write (20HMz max) */
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #if DEBUG
 #define debug()  printf("%s:%d \n\r ",__FUNCTION__,__LINE__)
