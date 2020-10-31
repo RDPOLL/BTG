@@ -58,15 +58,18 @@ static const unsigned char logo_bits[] PROGMEM = {
 /* 
 Hmmm... Dies sollte in ein include File ... Den andere Module brauchen dies evtl. auch, nicht nur main.c
 */
-
+#define LED_ORA_ON           PORTB|= (1<<PB1)
+#define LED_ORA_OFF		PORTB &= ~(1<<PB1)
 #define LED_ROT_ON		PORTB |= (1<<PB2)
 #define LED_ROT_OFF		PORTB &= ~(1<<PB2)
 #define LED_GRUN_ON		PORTB |= (1<<PB3)
 #define LED_GRUN_OFF	PORTB &= ~(1<<PB3)
+
 #define TRANSISTOR_OFF	PORTC &= ~(1<<PC7)
 #define TRANSISTOR_ON	PORTC |= (1<<PC7)
-#define PIEZZO_OFF		PORTC &= ~(1<<PC6)
-#define PIEZZO_ON		PORTC |= (1<<PC6)
+
+#define PIEZZO_OFF		PORTC &= ~((1<<PC6)| (1<<PC7))
+#define PIEZZO_ON		PORTC |= ((1<<PC6) | (1<<PC7) )
 #define LED_BAT_ON		PORTD |= (1<<PD0)
 #define LED_BAT_OFF		PORTD &= ~(1<<PD0)
 
@@ -376,7 +379,7 @@ int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
   printf("%s3 open returned %d \n\r",__FUNCTION__,stat);
    if(stat != FR_OK) return -1;
    //f_printf(&file,"%s;%d;%d;%d;%d\n\r",user_name,YEAR,KW,cur,volt);
-   sprintf(line,"%s;%d;%d;%d;%d;%s\n\r",user_name,YEAR,KW,cur,volt,txt);
+   sprintf(line,"%s;%d;%d;%d;%d;%s\n",user_name,YEAR,KW,cur,volt,txt);
    f_write(&file,line,strlen(line),&len);
    printf("%s4 open returned %d \n\r",__FUNCTION__,stat);
    f_sync(&file);
@@ -542,23 +545,41 @@ int main(void)
     	    }
 	  _delay_ms(30); // switch prellung
 	  draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,"Test Battery");
-		
+	  LED_ORA_ON;
 		volt = setLast_readVolt(tst_cur);
 		write_res("0:Res.csv",tst_cur,volt,volt<tst_voltage?"Failed":"Passed");
-			
+		LED_ORA_OFF;	
 		//draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
+		
+	
+	       
 		if(volt < tst_voltage)
 		  {
+		    LED_ROT_ON;
 		    draw_back(RED);
+		    sprintf(output, "%2d.%03d V FAILED", volt/1000,(volt%1000));
+		    draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,output);
+		    for(int x=0;x<30;x++)
+		      {
+			_delay_ms(100);
+			if(piezo == 1) {
+			  if(x&1) PIEZZO_ON;
+			    else PIEZZO_OFF;
+			}
+		      }
 		  }
 		else {
+		  LED_GRUN_ON;
+		  
+		  if(piezo ==1 ) PIEZZO_ON;
 		  draw_back(GREEN);
+		  sprintf(output, "%2d.%03d V PASSED", volt/1000,(volt%1000));
+		  draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,output);
+		  _delay_ms(3000);
 		}
-		sprintf(output, "%2d.%03d V", volt/1000,(volt%1000));
 		
 		
-	       draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,output);
-		_delay_ms(3000);
+		LED_ROT_OFF; LED_GRUN_OFF; PIEZZO_OFF;
 		//print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
 		while ((PINA & 4) == 4); //wait until pack is out
 		
