@@ -186,7 +186,7 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
      if((cur-1) > sollStrom) pwm --;
      OCR2B=pwm;
      _delay_ms(200);   //stabilize pwm and current meassure
-     if(debug > 1 ) printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
+     if(debug > 0 ) printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
   }
 
   adc1=read_ADC(3);
@@ -280,6 +280,13 @@ void draw_progress(int x, int y, int sx, int sy, int len, int prog)
   }
 }
 
+void draw_back(int bc)
+{
+  	ili9341_clear(bc);
+	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,5,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
+
+}
+
 
 /* 
 This Stuff is needed for the fat fs 
@@ -354,7 +361,7 @@ int read_ini()
 }
 
 
-int write_res(char *name, unsigned short cur, unsigned short volt )
+int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
 {
 
    FIL file ;
@@ -369,7 +376,7 @@ int write_res(char *name, unsigned short cur, unsigned short volt )
   printf("%s3 open returned %d \n\r",__FUNCTION__,stat);
    if(stat != FR_OK) return -1;
    //f_printf(&file,"%s;%d;%d;%d;%d\n\r",user_name,YEAR,KW,cur,volt);
-   sprintf(line,"%s;%d;%d;%d;%d\n\r",user_name,YEAR,KW,cur,volt);
+   sprintf(line,"%s;%d;%d;%d;%d;%s\n\r",user_name,YEAR,KW,cur,volt,txt);
    f_write(&file,line,strlen(line),&len);
    printf("%s4 open returned %d \n\r",__FUNCTION__,stat);
    f_sync(&file);
@@ -465,14 +472,15 @@ int main(void)
 ////////////////////////////////////////////////////////////////////////
 
 	TRANSISTOR_OFF;															//Ton ausschalten / nur beim Programmieren notwenig
-	piezo = eeprom_read_word((uint16_t *) 4);					
+	//piezo = eeprom_read_word((uint16_t *) 4);					
 		
-	print_at_lcd(130, 180, YELLOW, BACK_GRAY, 2, "RUAG Schweiz AG");
+	//print_at_lcd(130, 180, YELLOW, BACK_GRAY, 2, "RUAG Schweiz AG");
 	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,5,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
 
-	draw_msg((ILI9341_TFTWIDTH/2) -(150/2),90,150,100,3,3,"Booting..");
+	draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,3,3,"Booting..");
 	
 	  f_mount(&fs, "", 0);
+	  _delay_ms(500);
 	  /*
 	  print_at_lcd(100,220,CYAN,BLACK,1,"Test1 %x %x %x ",&fil, stat, Timer);
 	  f_open(&fil,"0:Names.txt",FA_READ);
@@ -486,29 +494,73 @@ int main(void)
 	  //f_read (&fil,output,20,&stat);
 	  print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
 	  //printf("%08s\n\r",output);
-	  read_ini();
-	  
+ sd_read:
+	  stat=read_ini();
+	  if(stat < 0) {
+	    
+	    if(stat == -1) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"SD File Missing");
+	    if(stat == -2) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Config file Format Error");
+	    if(stat == -3) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Missing Field in File");
+	    do {
+	     if((PINC & 16) == 0 )
+	       goto sd_read;
+	    }
+	     while(1);
+	  }
 
 //////////////////////////Endlosschleife////////////////////////////////
 	
+	  
 	while(1)  
 	{	
-		int fc[]={CYAN,BLACK,BLACK,BLACK};
+	  draw_back( BACK_GRAY);
+	  print_at_lcd(10,220,WHITE, BACK_GRAY ,1, "User:%s KW%d Jahr:%d\n",user_name, KW, YEAR);
+	back:
+	  if((PINA & 2 ) != 2)
+	    {
+	      draw_msg(10,160,150,50,1,1,"Missing Adapter");
+	      if((PINC & 16) == 16)
+		goto back;
+	    }
+	  
+	  /*
+	      int fc[]={CYAN,BLACK,BLACK,BLACK};
 		int bg[]={BACK_GRAY,GREEN,RED,CYAN};
 		//KA = eeprom_read_word((uint16_t*)8);
 		   
-		print_at_lcd(10,220,fc[background], bg[background],1, "User:%s KW%d \n",user_name, KW);
+		print_at_lcd(10,220,WHITE, BACK_GRAY ,1, "User:%s KW%d \n",user_name, KW);
 		//YEAR = eeprom_read_word((uint16_t*)12);							  
 		print_at_lcd(205,220,fc[background], bg[background],2, "Jahr:%d\n", YEAR);
+	  */
 
-		volt = setLast_readVolt(100);
-		write_res("0:Res.csv",100,volt);
+	  if ((PINA & 4) != 4)
+	    {
+	      draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,2,"Please Insert Battery");
+	      while((PINA &4 ) != 4);
+	   
+	      
+    	    }
+	  _delay_ms(30); // switch prellung
+	  draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,"Test Battery");
+		
+		volt = setLast_readVolt(tst_cur);
+		write_res("0:Res.csv",tst_cur,volt,volt<tst_voltage?"Failed":"Passed");
 			
-		draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
+		//draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
+		if(volt < tst_voltage)
+		  {
+		    draw_back(RED);
+		  }
+		else {
+		  draw_back(GREEN);
+		}
 		sprintf(output, "%2d.%03d V", volt/1000,(volt%1000));
-		draw_button(10, 60 , 150 , 40 , 2 , 1 , output);
-		draw_msg(10,110,150,50,1,2,"Insert Battery");
-		draw_msg(10,160,150,50,1,0,"Test Battery");
+		
+		
+	       draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,output);
+		_delay_ms(3000);
 		//print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
+		while ((PINA & 4) == 4); //wait until pack is out
+		
 	}
 }
