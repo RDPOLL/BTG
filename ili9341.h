@@ -50,10 +50,10 @@
 #define LCD_RGB( _r_,_g_,_b_) (((((unsigned int)(_r_))&0xF8)<<8)|((((unsigned int)(_g_))&0xFC)<<3)|(((unsigned int)(_b_))>>3))
 //#define LCD_RGB( _r_,_g_,_b_) (((((unsigned int)(_r_))&0x1f)<<11)|((((unsigned int)(_g_))&63)<<5)|(((unsigned int)(_b_))&0x1f))
 
-
-
-
-
+//#define IL_DRAW_CIRCLE
+//#define IL_DRAW_LINE
+//#define IL_DRAW_ROUNDREC
+//#define IL_DRAW_BIT
 void ili9341_hard_init(void);
 void ili9341_spi_init(void);
 void ili9341_spi_send(unsigned char spi_data);

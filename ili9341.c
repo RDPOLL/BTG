@@ -335,6 +335,7 @@ break;
 }
 }
 
+#if IL_DRAW_CIRCLE
 // Draw a circle outline
 void ili9341_drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color) 
 {
@@ -369,6 +370,7 @@ void ili9341_drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
     ili9341_drawpixel(x0 - y, y0 - x, color);
   }
 }
+
 
 //DRaw Circle Helper
 void ili9341_drawCircleHelper( int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color) 
@@ -444,6 +446,7 @@ void ili9341_fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornern
   }
 }
 
+#endif
 
 void ili9341_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) 
 {
@@ -457,6 +460,7 @@ void ili9341_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
   ili9341_drawhline(x, y, x+w-1,  color);
 }
 
+#if IL_DRAW_LINE
 
 // Bresenham's algorithm - thx wikpedia
 void ili9341_drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) 
@@ -499,6 +503,8 @@ void ili9341_drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t c
   }
 }
 
+#endif
+
 // Draw a rectangle
 void ili9341_drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) 
 {
@@ -516,6 +522,7 @@ void ili9341_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color
     ili9341_drawFastVLine(i, y, h, color);
   }
 }
+#if IL_DRAW_ROUNDREC
 // Draw a rounded rectangle
 void ili9341_drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color) 
 {
@@ -541,7 +548,9 @@ void ili9341_fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r
   ili9341_fillCircleHelper(x+w-r-1, y+r, r, 1, h-2*r-1, color);
   ili9341_fillCircleHelper(x+r    , y+r, r, 2, h-2*r-1, color);
 }
+#endif
 
+#if IL_DRAW_BIT
 // Draw a 1-bit image (bitmap) at the specified (x,y) position from the
 // provided bitmap buffer (must be PROGMEM memory) using the specified
 // foreground color (unset bits are transparent).
@@ -560,6 +569,7 @@ void ili9341_drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, 
   }
 }
 
+#endif
 
 //Draw XBitMap Files (*.xbm), exported from GIMP,
 //Usage: Export from GIMP to *.xbm, rename *.xbm to *.c and open in editor.

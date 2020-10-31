@@ -1,0 +1,87 @@
+digraph G {
+  node [fontname = "Handlee"];
+  edge [fontname = "Handlee"];
+  rankdir = "LR";
+ 
+
+  main [
+    label = "Main.c"
+    shape = oval;
+  ];
+  inithw [
+    label = "Init HW";
+    shape = rect;
+  ];
+  initdi [
+    label = "Init Display";
+    shape = rect;
+  ];
+  initsd [
+    label = "Init SD Card";
+    shape = rect;
+  ];
+  readin [
+    label = "Read Config File from SD Card\nSet corresponding Variables";
+    shape = rect;
+  ];
+  err1 [
+    label = "Error Reading Files";
+    shape = diamond;
+  ];
+  errsdmsg [
+    label = "Print SD Error Msg";
+    shape = rect;
+  ];
+  err2 [
+    label = "Adapter Connected?";
+    shape = diamond;
+  ];
+  erradmsg[
+    label = "Print Error Msg";
+    shape = rect;
+  ]
+
+  bttst [
+    label = "Battery Inserted ?"
+    shape = diamond;
+   ];
+  
+  testbt [
+    label = "Test Battery";
+    shape = rect;
+ ];
+  wrdata [
+    label = "Write Data to File";
+    shape = rect;
+  ];
+  shres [
+    label = "Show Result\naccording Config\nAudio, LED";
+    shape = rect;
+  ];
+
+  main -> inithw;
+  inithw -> initdi;
+  initdi -> initsd;
+  initsd -> readin;
+  readin -> err1;
+  err1:s -> err2:n [ label= "No" ];
+  err1 -> errsdmsg [ label = "Yes" ];
+  errsdmsg -> err1;
+  err2 -> erradmsg [ label ="No" ];
+  erradmsg -> err2;
+  err2:s -> bttst:n [ label="Yes" ];
+  bttst -> testbt [ label ="Yes" ];
+  bttst:e -> bttst:n [ label = "No"; ];
+  testbt -> wrdata;
+  wrdata -> shres:n;
+  shres:s -> bttst:n;
+  
+  
+  
+
+  {
+    rank=same;
+    main; inithw; initdi; initsd; readin; err1; err2; bttst; testbt; wrdata; shres;
+  }
+
+}

@@ -14,6 +14,11 @@
 #include "adc.h"
 #include "uart.h"
 #include "ff.h"
+#include "Stop.h"
+#include "Achtung.h"
+#include "Volt.h"
+#include "Gear.h"
+
 
 
 
@@ -74,8 +79,10 @@ extern uint16_t _height;
 
 unsigned short pwm = 0;
 unsigned short pwm_offset=150;
+unsigned short tst_voltage=12000; // default test voltage in mV
+unsigned short tst_cur=50;    // default test current in mA 
 unsigned char piezo=0;     // Lautsprecher ein-/ausschalten (PIEZO-Summer)
-unsigned char debug=0;     // if >0 show debug infos @serial
+unsigned char debug=1;     // if >0 show debug infos @serial
 
 uint16_t KA = 0;
 uint16_t KW = 0;
@@ -91,7 +98,6 @@ uint8_t	 background = 0;
 static FILE lcd_out = FDEV_SETUP_STREAM(ili9341_putchar_printf, NULL, _FDEV_SETUP_WRITE);
 static FILE mydata2 = FDEV_SETUP_STREAM(uart_putchar_printf, NULL, _FDEV_SETUP_WRITE);
 
-char string[10]={0};
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -231,6 +237,34 @@ void draw_button(int x, int y, int sx, int sy, int len ,int flag, char * text)
  print_at_lcd(x+len+15, y+len + (sy/2) - 4, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),1,text);
 }
 
+void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
+{
+  int w,h;
+  const unsigned char * pics;
+
+    switch (which)
+    {
+    case 0:
+      w=volt_width; h=volt_height; pics=volt_bits;
+      break;
+     case 1:
+      w=Stop_width; h=Stop_height; pics=Stop_bits;
+      break;
+    case 2:
+    default:
+      w=Achtung_width; h=Achtung_height; pics=Achtung_bits;
+      break;
+    case 3:
+      w=Gear_width; h=Gear_height; pics=Gear_bits;
+      break; 
+
+    }
+  draw_box(x,y,sx,sy,3,flag);
+  ili9341_drawXBitmap(x+10,y+((sy/2) - (h/2)),pics,w,h, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0));
+  print_at_lcd(x+w+15, y+((sy/2)- (h/2)),  (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),1,text );
+}
+
+
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
@@ -263,7 +297,7 @@ ISR(TIMER0_COMPA_vect)
 
 /* 
 Read the "read.ini" file, with the configuration for the tester 
-return 0 if everything was ok, otherwise -1
+return 0 if everything was ok, otherwise -1 for file problems, -2 Format error, -3 missing fields
 
 read.ini file has follow structure :
 "variable" = "value"
@@ -281,7 +315,6 @@ pwm_offset = [integer number]
 
 */
 
-
 int read_ini()
 {
   FIL file ;
@@ -289,26 +322,64 @@ int read_ini()
   char line[80];
   char cmd[16];
   char var[40];
+  int st;
+  int tst=0;
 
   stat=f_open(&file,"0:read.ini",FA_READ);
+  printf("%s: open returned %d",__FUNCTION__,stat);
   if (stat != FR_OK) return -1;
   while(f_gets(line,80,&file) )
     {
+      if(line[0] == 0) continue; // probably newline
       if(line[0] == '#') continue;
-      sscanf(line,"%s = %16[^\n]",cmd,var);
-      printf("%s: %s %s\n\r",__FUNCTION__,cmd,var);
-      if(strcmp(cmd,"week")==0) KW=atoi(var);
-      if(strcmp(cmd,"year")==0) YEAR=atoi(var);
-      if(strcmp(cmd,"name")==0) user_name=strdup(var);
+      st=sscanf(line,"%s = %16[^\n]",cmd,var) ;
+      printf("%s: %s %s scanf %d\n\r",__FUNCTION__,cmd,var,st);
+	if(st != 2) return -2; // Format Error
+	if(strcmp(cmd,"week")==0) { KW=atoi(var); tst|= 1; } // flag for week
+	if(strcmp(cmd,"year")==0) { YEAR=atoi(var); tst|=2; } // flag for year
+	if(strcmp(cmd,"name")==0) { user_name=strdup(var); tst|= 4; } // flag for name
       if(strcmp(cmd,"pwm_offset")==0) pwm_offset=atoi(var);
       if(strcmp(cmd,"piezo")==0) piezo=atoi(var);
       if(strcmp(cmd,"debug")==0) debug=atoi(var);
+      if(strcmp(cmd,"voltage")==0) { tst_voltage=atoi(var); tst|=8; }
+      if(strcmp(cmd,"current")==0) { tst_cur=atoi(var); tst|=16; }
       
     }
+  
   f_close(&file);
-  return 0;
+  if(tst != 31 ) return -3; // missing fields
+  else
+    return 0;
   
 }
+
+
+int write_res(char *name, unsigned short cur, unsigned short volt )
+{
+
+   FIL file ;
+   int stat;
+   char fname[16];
+   char line[80];
+   int len;
+
+  
+    printf("%s2 open returned %d \n\r",__FUNCTION__,stat);
+   stat=f_open(&file, name,FA_OPEN_APPEND | FA_WRITE );
+  printf("%s3 open returned %d \n\r",__FUNCTION__,stat);
+   if(stat != FR_OK) return -1;
+   //f_printf(&file,"%s;%d;%d;%d;%d\n\r",user_name,YEAR,KW,cur,volt);
+   sprintf(line,"%s;%d;%d;%d;%d\n\r",user_name,YEAR,KW,cur,volt);
+   f_write(&file,line,strlen(line),&len);
+   printf("%s4 open returned %d \n\r",__FUNCTION__,stat);
+   f_sync(&file);
+   printf("%s5 open returned %d \n\r",__FUNCTION__,stat);
+   f_close(&file);
+   printf("%s6 open returned %d \n\r",__FUNCTION__,stat);
+
+   return 0;
+}
+
 
 
 //////////////////////////////////////Hauptprogramm///////////////////////////////////////
@@ -375,11 +446,14 @@ int main(void)
 	sei();
 
 	uart_init();
-	uart_puts("Booting..");
+	
 
-	messInit();
+	
 	
 	stdout = &mydata2;
+	printf("Booting..");
+	messInit();
+	
 	ili9341_init();														//initial driver setup to drive ili9341
 	ili9341_clear(BACK_GRAY);												//fill screen with black colour
 	//_delay_ms(1000);
@@ -396,8 +470,10 @@ int main(void)
 	print_at_lcd(130, 180, YELLOW, BACK_GRAY, 2, "RUAG Schweiz AG");
 	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,5,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
 
-
+	draw_msg((ILI9341_TFTWIDTH/2) -(150/2),90,150,100,3,3,"Booting..");
+	
 	  f_mount(&fs, "", 0);
+	  /*
 	  print_at_lcd(100,220,CYAN,BLACK,1,"Test1 %x %x %x ",&fil, stat, Timer);
 	  f_open(&fil,"0:Names.txt",FA_READ);
 	  print_at_lcd(100,220,CYAN,BLACK,1,"Test2 %x %x %x ",&fil, stat, Timer);
@@ -406,7 +482,7 @@ int main(void)
 	    printf("%20s",output);
 
 	  f_close(&fil);
-	  
+	*/
 	  //f_read (&fil,output,20,&stat);
 	  print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
 	  //printf("%08s\n\r",output);
@@ -426,10 +502,13 @@ int main(void)
 		print_at_lcd(205,220,fc[background], bg[background],2, "Jahr:%d\n", YEAR);
 
 		volt = setLast_readVolt(100);
+		write_res("0:Res.csv",100,volt);
 			
 		draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
 		sprintf(output, "%2d.%03d V", volt/1000,(volt%1000));
 		draw_button(10, 60 , 150 , 40 , 2 , 1 , output);
+		draw_msg(10,110,150,50,1,2,"Insert Battery");
+		draw_msg(10,160,150,50,1,0,"Test Battery");
 		//print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
 	}
 }

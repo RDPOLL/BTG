@@ -25,7 +25,7 @@
 #define	FCLK_SLOW()     SPSR |= ((1<<SPR1) | (1<<SPR0))  //doubling spi speed.i.e final spi speed-fosc/2		/* Set SPI clock for initialization (100-400kHz) */
 #define	FCLK_FAST()	do { SPSR &= ~((1<<SPR1) | (1<<SPR0))	; SPSR |=(1<<SPI2X); } while (0)				/* Set SPI clock for read/write (20HMz max) */
 
-//#define DEBUG 1
+#define DEBUG 1
 
 #if DEBUG
 #define debug()  printf("%s:%d \n\r ",__FUNCTION__,__LINE__)
@@ -248,6 +248,7 @@ int xmit_datablock (
 	BYTE resp;
 
 
+debug();
 	if (!wait_ready(500)) return 0;		/* Leading busy check: Wait for card ready to accept data block */
 
 	xchg_spi(token);					/* Xmit data token */
@@ -257,6 +258,7 @@ int xmit_datablock (
 	xchg_spi(0xFF); xchg_spi(0xFF);		/* Dummy CRC */
 
 	resp = xchg_spi(0xFF);				/* Receive data resp */
+debug();
 
 	return (resp & 0x1F) == 0x05 ? 1 : 0;	/* Data was accepted or not */
 
@@ -280,7 +282,6 @@ BYTE send_cmd (		/* Returns R1 resp (bit7==1:Send failed) */
 
 
 
-debug();
 	if (cmd & 0x80) {	/* ACMD<n> is the command sequense of CMD55-CMD<n> */
 		cmd &= 0x7F;
 		res = send_cmd(CMD55, 0);
@@ -311,7 +312,6 @@ debug();
 		res = xchg_spi(0xFF);
 	while ((res & 0x80) && --n);
 
-debug();
 	return res;			/* Return with the response value */
 }
 
@@ -333,54 +333,41 @@ DSTATUS mmc_disk_initialize (void)
 	BYTE n, cmd, ty, ocr[4];
 
 
-debug();
 	power_off();						/* Turn off the socket power to reset the card */
 	
-debug();
 	for (Timer1 = 10; Timer1; ) ;		/* Wait for 100ms */
 	if (Stat & STA_NODISK) return Stat;	/* No card in the socket? */
-debug();
 	
 
 	power_on();							/* Turn on the socket power */
 	FCLK_SLOW();
 	for (n = 10; n; n--) xchg_spi(0xFF);	/* 80 dummy clocks */
-debug();
 
 	ty = 0;
 	if (send_cmd(CMD0, 0) == 1) {			/* Put the card SPI mode */
-debug();
 		Timer1 = 100;						/* Initialization timeout of 1000 msec */
 		if (send_cmd(CMD8, 0x1AA) == 1) {	/* Is the card SDv2? */
-debug();
 			for (n = 0; n < 4; n++) ocr[n] = xchg_spi(0xFF);	/* Get trailing return value of R7 resp */
 			if (ocr[2] == 0x01 && ocr[3] == 0xAA) {				/* The card can work at vdd range of 2.7-3.6V */
-debug();
 				while (Timer1 && send_cmd(ACMD41, 1UL << 30));	/* Wait for leaving idle state (ACMD41 with HCS bit) */
 				if (Timer1 && send_cmd(CMD58, 0) == 0) {		/* Check CCS bit in the OCR */
 					for (n = 0; n < 4; n++) ocr[n] = xchg_spi(0xFF);
 					ty = (ocr[0] & 0x40) ? CT_SD2 | CT_BLOCK : CT_SD2;	/* Check if the card is SDv2 */
 				}
 			}
-debug();
 		} else {							/* SDv1 or MMCv3 */
 			if (send_cmd(ACMD41, 0) <= 1) 	{
-debug();
 				ty = CT_SD1; cmd = ACMD41;	/* SDv1 */
 			} else {
-debug();
 				ty = CT_MMC; cmd = CMD1;	/* MMCv3 */
 			}
-debug();
 			while (Timer1 && send_cmd(cmd, 0));			/* Wait for leaving idle state */
 			if (!Timer1 || send_cmd(CMD16, 512) != 0)	/* Set R/W block length to 512 */
 				ty = 0;
 		}
-debug();
 	}
 	CardType = ty;
 	deselect();
-debug();
 
 	if (ty) {			/* Initialization succeded */
 		Stat &= ~STA_NOINIT;		/* Clear STA_NOINIT */
@@ -389,7 +376,6 @@ debug();
 		power_off();
 	}
 
-debug();
 	return Stat;
 }
 
@@ -420,20 +406,25 @@ DRESULT mmc_disk_read (
 	DWORD sect = (DWORD)sector;
 
 
+debug();
 	if (!count) return RES_PARERR;
 	if (Stat & STA_NOINIT) return RES_NOTRDY;
+debug();
 
 	if (!(CardType & CT_BLOCK)) sect *= 512;	/* Convert to byte address if needed */
 
 	cmd = count > 1 ? CMD18 : CMD17;			/*  READ_MULTIPLE_BLOCK : READ_SINGLE_BLOCK */
+debug();
 	if (send_cmd(cmd, sect) == 0) {
 		do {
 			if (!rcvr_datablock(buff, 512)) break;
 			buff += 512;
 		} while (--count);
+debug();
 		if (cmd == CMD18) send_cmd(CMD12, 0);	/* STOP_TRANSMISSION */
 	}
 	deselect();
+debug();
 
 	return count ? RES_ERROR : RES_OK;
 }
@@ -453,20 +444,24 @@ DRESULT mmc_disk_write (
 {
 	DWORD sect = (DWORD)sector;
 
+debug();
 
 	if (!count) return RES_PARERR;
 	if (Stat & STA_NOINIT) return RES_NOTRDY;
 	if (Stat & STA_PROTECT) return RES_WRPRT;
+debug();
 
 	if (!(CardType & CT_BLOCK)) sect *= 512;	/* Convert to byte address if needed */
 
 	if (count == 1) {	/* Single block write */
+debug();
 		if ((send_cmd(CMD24, sect) == 0)	/* WRITE_BLOCK */
 			&& xmit_datablock(buff, 0xFE)) {
 			count = 0;
 		}
 	}
 	else {				/* Multiple block write */
+debug();
 		if (CardType & CT_SDC) send_cmd(ACMD23, count);
 		if (send_cmd(CMD25, sect) == 0) {	/* WRITE_MULTIPLE_BLOCK */
 			do {
@@ -477,6 +472,7 @@ DRESULT mmc_disk_write (
 		}
 	}
 	deselect();
+debug();
 
 	return count ? RES_ERROR : RES_OK;
 }

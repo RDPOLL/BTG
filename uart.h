@@ -13,6 +13,13 @@
 #include <stdint.h>
 #include <avr/pgmspace.h>
 
+
+//#define UART_HEX
+//#define UART_DEC
+//#define UART_STR
+//#define UART_GETC
+
+
 #ifdef __cplusplus
 extern "C"
 {

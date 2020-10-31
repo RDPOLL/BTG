@@ -105,10 +105,10 @@ MATH_LIB = -lm
 # only used for heap (malloc()).
 #EXTMEMOPTS = -Wl,--defsym=__heap_start=0x801100,--defsym=__heap_end=0x80ffff
 
-EXTMEMOPTS =
+EXTMEMOPTS = -L fatfs -lfat 
 
-#LDMAP = $(LDFLAGS) -Wl,-Map=$(TARGET).map,--cref
-LDFLAGS = fatfs/obj_mmc/ff.o  fatfs/obj_mmc/ffunicode_avr.o fatfs/obj_mmc/diskio.o fatfs/obj_mmc/mmc_avr_spi.o $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
+LDMAP = -Wl,-Map=$(TARGET).map,--cref
+LDFLAGS = $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 
 
 # Programming support using avrdude. Settings and variables.

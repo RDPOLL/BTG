@@ -97,7 +97,7 @@ int16_t uart_putchar_printf(char var, FILE *stream)//this function will be calle
 	return 1;
 }
 
-
+#if UART_HEX
 
 void uart_putc_hex(uint8_t b)
 {
@@ -114,6 +114,8 @@ void uart_putc_hex(uint8_t b)
         uart_putc((b & 0x0f) - 0x0a + 'a');
 }
 
+
+
 void uart_putw_hex(uint16_t w)
 {
     uart_putc_hex((uint8_t) (w >> 8));
@@ -126,6 +128,9 @@ void uart_putdw_hex(uint32_t dw)
     uart_putw_hex((uint16_t) (dw & 0xffff));
 }
 
+#endif
+
+#if UART_DEC
 void uart_putw_dec(uint16_t w)
 {
     uint16_t num = 10000;
@@ -163,7 +168,9 @@ void uart_putdw_dec(uint32_t dw)
         num /= 10;
     }
 }
+#endif
 
+#if UART_STR
 void uart_puts(const char* str)
 {
     while(*str)
@@ -182,6 +189,9 @@ void uart_puts_p(PGM_P str)
     }
 }
 
+#endif
+
+#if UART_GETC
 uint8_t uart_getc()
 {
     /* wait until receive buffer is full */
@@ -203,6 +213,7 @@ uint8_t uart_getc()
 
     return b;
 }
+#endif
 
 EMPTY_INTERRUPT(USART_RXC_vect)
 
