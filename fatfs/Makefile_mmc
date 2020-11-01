@@ -19,7 +19,7 @@ CSTD = gnu99
 LIBS	=
 LIBDIRS	=
 INCDIRS	=
-DEFS	= F_CPU=16000000 DRV_MMC=0
+DEFS	= F_CPU=16000000UL DRV_MMC=0
 ADEFS	=
 
 ### Warning contorls
@@ -40,6 +40,7 @@ OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
 SIZE    = avr-size
 NM      = avr-nm
+RANLIB	= avr-ar 
 
 
 # Define all object files
@@ -130,6 +131,12 @@ size:
 	@echo
 	@echo Linking...
 	$(CC) $(CFLAGS) $(LDFLAGS) $(AOBJ) $(COBJ) -o $@
+
+
+#make library archive 
+lib:	$(AOBJ) $(COBJ)
+	rm libfat.a
+	$(RANLIB) -cr libfat.a  $(OBJDIR)/diskio.o $(OBJDIR)/mmc_avr_spi.o $(OBJDIR)/ff.o $(OBJDIR)/ffunicode_avr.o
 
 # Compile: create object files from C source files. ARM or Thumb(-2)
 $(COBJ) : $(OBJDIR)/%.o : %.c

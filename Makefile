@@ -190,6 +190,9 @@ COFFCONVERT=$(OBJCOPY) --debugging \
 --change-section-address .eeprom-0x810000
 
 
+fatfs: fatfs/*.c
+	make -C fatfs -f Makefile_mmc lib
+
 coff: $(TARGET).elf
 	$(COFFCONVERT) -O coff-avr $(TARGET).elf $(TARGET).cof
 
@@ -218,7 +221,7 @@ extcoff: $(TARGET).elf
 
 
 # Link: create ELF output file from object files.
-$(TARGET).elf: $(OBJ)
+$(TARGET).elf: $(OBJ) fatfs
 	$(CC) $(ALL_CFLAGS) $(OBJ) --output $@ $(LDFLAGS)
 
 
