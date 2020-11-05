@@ -342,8 +342,8 @@ DSTATUS mmc_disk_initialize (void)
 
 	power_on();							/* Turn on the socket power */
 	FCLK_SLOW();
-	_delay_ms(10);
-	for (n = 10; n; n--) xchg_spi(0xFF);	/* 80 dummy clocks */
+	_delay_ms(100);
+	for (n = 40; n; n--) xchg_spi(0xFF);	/* 80 dummy clocks */
 
 	ty = 0;
 	if (send_cmd(CMD0, 0) == 1) {			/* Put the card SPI mode */
