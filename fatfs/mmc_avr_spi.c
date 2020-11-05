@@ -13,6 +13,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 #include "diskio.h"
 #include "mmc_avr.h"
 #include <stdio.h>
@@ -341,6 +342,7 @@ DSTATUS mmc_disk_initialize (void)
 
 	power_on();							/* Turn on the socket power */
 	FCLK_SLOW();
+	_delay_ms(10);
 	for (n = 10; n; n--) xchg_spi(0xFF);	/* 80 dummy clocks */
 
 	ty = 0;
