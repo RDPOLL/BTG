@@ -163,7 +163,7 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 # Default target.
 all: build
 
-build: elf hex eep
+build: fatfs elf hex eep
 
 elf: $(TARGET).elf
 hex: $(TARGET).hex
@@ -258,4 +258,4 @@ depend:
 		>> $(MAKEFILE); \
 	$(CC) -M -mmcu=$(MCU) $(CDEFS) $(CINCS) $(SRC) $(ASRC) >> $(MAKEFILE)
 
-.PHONY:	all build elf hex eep lss sym program coff extcoff clean depend
+.PHONY:	all build fatfs elf hex eep lss sym program coff extcoff clean depend

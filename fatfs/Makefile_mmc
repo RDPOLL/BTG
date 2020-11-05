@@ -135,7 +135,7 @@ size:
 
 #make library archive 
 lib:	$(AOBJ) $(COBJ)
-	rm libfat.a
+	rm -f libfat.a
 	$(RANLIB) -cr libfat.a  $(OBJDIR)/diskio.o $(OBJDIR)/mmc_avr_spi.o $(OBJDIR)/ff.o $(OBJDIR)/ffunicode_avr.o
 
 # Compile: create object files from C source files. ARM or Thumb(-2)

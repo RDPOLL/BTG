@@ -195,7 +195,7 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
   adc1=read_ADC(3);
   if(adc1>0) volt=(adc1*29)+170; else volt =0;
 
-  pwm=0;
+  OCR2B=pwm=0;
   
   return volt;
 }
