@@ -481,7 +481,7 @@ int main(void)
 	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,5,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
 
 	draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,3,3,"Booting..");
-	
+
 	  f_mount(&fs, "", 0);
 	  _delay_ms(500);
 	  /*
@@ -495,7 +495,7 @@ int main(void)
 	  f_close(&fil);
 	*/
 	  //f_read (&fil,output,20,&stat);
-	  print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
+	  //print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
 	  //printf("%08s\n\r",output);
  sd_read:
 	  stat=read_ini();
@@ -521,7 +521,7 @@ int main(void)
 	back:
 	  if((PINA & 2 ) != 2)
 	    {
-	      draw_msg(10,160,150,50,1,1,"Missing Adapter");
+	      draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,150,50,1,1,"Missing Adapter");
 	      if((PINC & 16) == 16)
 		goto back;
 	    }
