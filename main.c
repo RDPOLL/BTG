@@ -286,7 +286,7 @@ void draw_progress(int x, int y, int sx, int sy, int len, int prog)
 void draw_back(int bc)
 {
   	ili9341_clear(bc);
-	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,5,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
+	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-20,20,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
 
 }
 
@@ -478,7 +478,7 @@ int main(void)
 	//piezo = eeprom_read_word((uint16_t *) 4);					
 		
 	//print_at_lcd(130, 180, YELLOW, BACK_GRAY, 2, "RUAG Schweiz AG");
-	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-2,5,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
+	draw_back(BACK_GRAY);
 
 	draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,3,3,"Booting..");
 
@@ -516,7 +516,7 @@ int main(void)
 	  
 	while(1)  
 	{	
-	  draw_back( BACK_GRAY);
+	  draw_back(BACK_GRAY);
 	  print_at_lcd(10,220,WHITE, BACK_GRAY ,1, "User:%s KW%d Jahr:%d\n",user_name, KW, YEAR);
 	back:
 	  if((PINA & 2 ) != 2)
