@@ -287,7 +287,7 @@ BYTE send_cmd (		/* Returns R1 resp (bit7==1:Send failed) */
 )
 {
 	BYTE n, res;
-
+	debug();
 
 
 	if (cmd & 0x80) {	/* ACMD<n> is the command sequense of CMD55-CMD<n> */
@@ -295,13 +295,13 @@ BYTE send_cmd (		/* Returns R1 resp (bit7==1:Send failed) */
 		res = send_cmd(CMD55, 0);
 		if (res > 1) return res;
 	}
-
+	debug();
 	/* Select the card and wait for ready except to stop multiple block read */
 	if (cmd != CMD12) {
 		deselect();
 		if (!select()) return 0xFF;
 	}
-
+	debug();
 	/* Send command packet */
 	xchg_spi(0x40 | cmd);				/* Start + Command index */
 	xchg_spi((BYTE)(arg >> 24));		/* Argument[31..24] */
