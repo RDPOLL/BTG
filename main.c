@@ -517,7 +517,7 @@ int main(void)
 	while(1)  
 	{	
 	  draw_back(BACK_GRAY);
-	  print_at_lcd(10,220,WHITE, BACK_GRAY ,1, "User:%s KW%d Jahr:%d\n",user_name, KW, YEAR);
+	  print_at_lcd(40,220,WHITE, BACK_GRAY ,1, "User:%s KW%d Jahr:%d\n",user_name, KW, YEAR);
 	back:
 	  if((PINA & 2 ) != 2)
 	    {
