@@ -55,10 +55,7 @@ static const unsigned char logo_bits[] PROGMEM = {
 #define BACK_GRAY (LCD_RGB(32,32,32))
 
 
-/* 
-Hmmm... Dies sollte in ein include File ... Den andere Module brauchen dies evtl. auch, nicht nur main.c
-*/
-#define LED_ORA_ON           PORTB|= (1<<PB1)
+#define LED_ORA_ON      PORTB|= (1<<PB1)
 #define LED_ORA_OFF		PORTB &= ~(1<<PB1)
 #define LED_ROT_ON		PORTB |= (1<<PB2)
 #define LED_ROT_OFF		PORTB &= ~(1<<PB2)
@@ -185,11 +182,11 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
     }
     cur/=10;
     
-     if((cur+1) < sollStrom) pwm ++;
-     if((cur-1) > sollStrom) pwm --;
-     OCR2B=pwm;
-     _delay_ms(200);   //stabilize pwm and current meassure
-     if(debug > 0 ) printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
+	if((cur+1) < sollStrom) pwm ++;
+	if((cur-1) > sollStrom) pwm --;
+	OCR2B=pwm;
+	_delay_ms(200);   //stabilize pwm and current meassure
+	if(debug > 0 ) printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
   }
 
   adc1=read_ADC(3);
@@ -205,8 +202,8 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
 
 void print_at_lcd(int x, int y, int fc, int bc, int fs, const char * fmt, ...)
 {
- va_list args;
- char buf[80];
+  va_list args;
+  char buf[80];
   
   ili9341_setcursor(x, y);									//
   ili9341_settextcolour(fc,bc);							//
@@ -225,13 +222,12 @@ void draw_box(int x,int y , int sx, int sy, int len , int flag)
   int a;
   
   ili9341_fillrect(x+len,y+len,sx-(2*len),sy-(2*len),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80));
-  for(a=0;a<=len;a++)
-    {
-      ili9341_drawhline(x+a,y+a,sx-(2*a),lcolor1);
-      ili9341_drawhline(x+a,(y+sy)-a,sx-(2*a),lcolor2);
-      ili9341_drawvline(x+a,y+a,sy-(2*a),lcolor1);
-      ili9341_drawvline((x+sx)-a,y+a,sy-(2*a),lcolor2);
-    }
+  for(a=0;a<=len;a++){
+   ili9341_drawhline(x+a,y+a,sx-(2*a),lcolor1);
+   ili9341_drawhline(x+a,(y+sy)-a,sx-(2*a),lcolor2);
+   ili9341_drawvline(x+a,y+a,sy-(2*a),lcolor1);
+   ili9341_drawvline((x+sx)-a,y+a,sy-(2*a),lcolor2);
+  }
 }
 
 void draw_button(int x, int y, int sx, int sy, int len ,int flag, char * text)
@@ -245,23 +241,22 @@ void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
   int w,h;
   const unsigned char * pics;
 
-    switch (which)
-    {
-    case 0:
-      w=volt_width; h=volt_height; pics=volt_bits;
-      break;
-     case 1:
-      w=Stop_width; h=Stop_height; pics=Stop_bits;
-      break;
-    case 2:
-    default:
-      w=Achtung_width; h=Achtung_height; pics=Achtung_bits;
-      break;
-    case 3:
-      w=Gear_width; h=Gear_height; pics=Gear_bits;
-      break; 
+  switch (which){
+   case 0:
+    w=volt_width; h=volt_height; pics=volt_bits;
+   break;
+   case 1:
+    w=Stop_width; h=Stop_height; pics=Stop_bits;
+   break;
+   case 2:
+   default:
+    w=Achtung_width; h=Achtung_height; pics=Achtung_bits;
+   break;
+   case 3:
+    w=Gear_width; h=Gear_height; pics=Gear_bits;
+   break; 
 
-    }
+  }
   draw_box(x,y,sx,sy,3,flag);
   ili9341_drawXBitmap(x+10,y+((sy/2) - (h/2)),pics,w,h, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0));
   print_at_lcd(x+w+15, y+((sy/2)- (h/2)),  (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),1,text );
@@ -278,25 +273,18 @@ void draw_progress(int x, int y, int sx, int sy, int len, int prog)
 
  draw_box(x,y,sx,sy,len,0);
  for(a=0;a<(sy-(2*len)-6);a++)
-  {
-   ili9341_drawhline(x+len+3,y+len+3+a,map(prog,0,100,0,mlen),LCD_RGB(0xf0,0,0));
-  }
+ {
+  ili9341_drawhline(x+len+3,y+len+3+a,map(prog,0,100,0,mlen),LCD_RGB(0xf0,0,0));
+ }
 }
 
 void draw_back(int bc)
 {
-  	ili9341_clear(bc);
-	ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-20,20,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
-
+ ili9341_clear(bc);
+ ili9341_drawXBitmap(ILI9341_TFTWIDTH-logo_width-20,20,logo_bits,logo_width,logo_height,LCD_RGB(255,255,255));
 }
 
-
-/* 
-This Stuff is needed for the fat fs 
-   Dont remove it 
-*/
 volatile UINT Timer;	/* Performance timer (100Hz increment) */
-
 
 ISR(TIMER0_COMPA_vect)
 {
@@ -339,22 +327,21 @@ int read_ini()
   printf("%s: open returned %d",__FUNCTION__,stat);
   if (stat != FR_OK) return -1;
   while(f_gets(line,80,&file) )
-    {
-      if(line[0] == 0) continue; // probably newline
-      if(line[0] == '#') continue;
-      st=sscanf(line,"%s = %16[^\n]",cmd,var) ;
-      printf("%s: %s %s scanf %d\n\r",__FUNCTION__,cmd,var,st);
-	if(st != 2) return -2; // Format Error
-	if(strcmp(cmd,"week")==0) { KW=atoi(var); tst|= 1; } // flag for week
-	if(strcmp(cmd,"year")==0) { YEAR=atoi(var); tst|=2; } // flag for year
-	if(strcmp(cmd,"name")==0) { user_name=strdup(var); tst|= 4; } // flag for name
-      if(strcmp(cmd,"pwm_offset")==0) pwm_offset=atoi(var);
-      if(strcmp(cmd,"piezo")==0) piezo=atoi(var);
-      if(strcmp(cmd,"debug")==0) debug=atoi(var);
-      if(strcmp(cmd,"voltage")==0) { tst_voltage=atoi(var); tst|=8; }
-      if(strcmp(cmd,"current")==0) { tst_cur=atoi(var); tst|=16; }
-      
-    }
+  {
+   if(line[0] == 0) continue; // probably newline
+   if(line[0] == '#') continue;
+   st=sscanf(line,"%s = %16[^\n]",cmd,var) ;
+   printf("%s: %s %s scanf %d\n\r",__FUNCTION__,cmd,var,st);
+   if(st != 2) return -2; // Format Error
+   if(strcmp(cmd,"week")==0) { KW=atoi(var); tst|= 1; } // flag for week
+   if(strcmp(cmd,"year")==0) { YEAR=atoi(var); tst|=2; } // flag for year
+   if(strcmp(cmd,"name")==0) { user_name=strdup(var); tst|= 4; } // flag for name
+   if(strcmp(cmd,"pwm_offset")==0) pwm_offset=atoi(var);
+   if(strcmp(cmd,"piezo")==0) piezo=atoi(var);
+   if(strcmp(cmd,"debug")==0) debug=atoi(var);
+   if(strcmp(cmd,"voltage")==0) { tst_voltage=atoi(var); tst|=8; }
+   if(strcmp(cmd,"current")==0) { tst_cur=atoi(var); tst|=16; } 
+  }
   
   f_close(&file);
   if(tst != 31 ) return -3; // missing fields
@@ -374,9 +361,9 @@ int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
    int len;
 
   
-    printf("%s2 open returned %d \n\r",__FUNCTION__,stat);
+   printf("%s2 open returned %d \n\r",__FUNCTION__,stat);
    stat=f_open(&file, name,FA_OPEN_APPEND | FA_WRITE );
-  printf("%s3 open returned %d \n\r",__FUNCTION__,stat);
+   printf("%s3 open returned %d \n\r",__FUNCTION__,stat);
    if(stat != FR_OK) return -1;
    //f_printf(&file,"%s;%d;%d;%d;%d\n\r",user_name,YEAR,KW,cur,volt);
    sprintf(line,"%s;%d;%d;%d;%d;%s\n",user_name,YEAR,KW,cur,volt,txt);
@@ -403,78 +390,75 @@ int main(void)
     FATFS fs;
     FIL fil;
     int stat;
-
-    
-    
-       
-	DDRD |= (1<<PD5);													//
-	PORTD |= (1<<PD5);													// LED Display
+  
+	DDRD |= (1<<PD5);
+	PORTD |= (1<<PD5);			//LED Display
 	
-	DDRB |= (1<<PB4);													//
-	PORTB |= (1<<PB4);													// SD-Karte; CS
+	DDRB |= (1<<PB4);
+	PORTB |= (1<<PB4);			//SD-Karte; CS
 	
-	DDRD |= (1<<PD0);													//
-	PORTD &= ~(1<<PD0);													// LED Bat
+	DDRD |= (1<<PD0);
+	PORTD &= ~(1<<PD0);			//LED Bat
 	
-	DDRB |= (1<<PB2);													//
-	PORTB &= ~(1<<PB2);													// LED Rot
+	DDRB |= (1<<PB2);
+	PORTB &= ~(1<<PB2);			//LED Rot
 	
-	DDRB |= (1<<PB3);													//
-	PORTB &= ~(1<<PB3);													// LED Grün
+	DDRB |= (1<<PB3);
+	PORTB &= ~(1<<PB3);			//LED Grün
 	
-	DDRC |= (1<<PC7);													//
-	PORTC &= ~(1<<PC7);													// Transistor
+	DDRC |= (1<<PC7);
+	PORTC &= ~(1<<PC7);			//Transistor
 	
-	DDRC |= (1<<PC6);													//
-	PORTC &= ~(1<<PC6);													// Piezzo
+	DDRC |= (1<<PC6);
+	PORTC &= ~(1<<PC6);			//Piezzo
 	
-	DDRC &= ~(1<<PC4);													//
-	PORTC |= (1<<PC4);													// ENTER-Taster
+	DDRC &= ~(1<<PC4);
+	PORTC |= (1<<PC4);			//ENTER-Taster
 	
-	DDRC &= ~(1<<PC3);													//
-	PORTC |= (1<<PC3);													// DOWN-Taster
+	DDRC &= ~(1<<PC3);
+	PORTC |= (1<<PC3);			//DOWN-Taster
 	
-	DDRC &= ~(1<<PC5);													//
-	PORTC |= (1<<PC5);													// UP-Taster
+	DDRC &= ~(1<<PC5);
+	PORTC |= (1<<PC5);			//UP-Taster
 	
-	DDRA &= ~(1<<PA2);													//
-	PORTA &= ~(1<<PA2);													// Taster im Adapter
+	DDRA &= ~(1<<PA2);
+	PORTA &= ~(1<<PA2);			//Taster im Adapter
 	
-	DDRA &= ~(1<<PA1);													//
-	PORTA &= ~(1<<PA1);													// Adaptererkennung
+	DDRA &= ~(1<<PA1);
+	PORTA &= ~(1<<PA1);			//Adaptererkennung
 	
 	DDRD |= (1<<PD6);
 
 	DDRD |= (1<<PD1);
 	//^tx
-		/* Start 100Hz system timer with TC0 */
+	
+	/* Start 100Hz system timer with TC0 */
 	OCR0A = F_CPU / 1024 / 100 - 1;
 	TCCR0A = _BV(WGM01);
 	TCCR0B = 0b101;
 	TIMSK0 = _BV(OCIE0A);
 
+	//enable interupt
 	sei();
 
 	uart_init();
-	
 
-	
-	
 	stdout = &mydata2;
 	printf("Booting..");
 	messInit();
-	
-	ili9341_init();														//initial driver setup to drive ili9341
-	ili9341_clear(BACK_GRAY);												//fill screen with black colour
+
+	//Display init
+	ili9341_init();						//initial driver setup to drive ili9341
+	ili9341_clear(BACK_GRAY);			//fill screen with black colour
 	//_delay_ms(1000);
-	ili9341_setRotation(3);												//rotate screen
+	ili9341_setRotation(3);				//rotate screen
 	_delay_ms(2);
 
 	
 
 ////////////////////////////////////////////////////////////////////////
 
-	TRANSISTOR_OFF;															//Ton ausschalten / nur beim Programmieren notwenig
+	TRANSISTOR_OFF;						//Ton ausschalten / nur beim Programmieren notwenig
 	//piezo = eeprom_read_word((uint16_t *) 4);					
 		
 	//print_at_lcd(130, 180, YELLOW, BACK_GRAY, 2, "RUAG Schweiz AG");
@@ -482,34 +466,36 @@ int main(void)
 
 	draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,3,3,"Booting..");
 
-	  f_mount(&fs, "", 0);
-	  _delay_ms(500);
-	  /*
-	  print_at_lcd(100,220,CYAN,BLACK,1,"Test1 %x %x %x ",&fil, stat, Timer);
-	  f_open(&fil,"0:Names.txt",FA_READ);
-	  print_at_lcd(100,220,CYAN,BLACK,1,"Test2 %x %x %x ",&fil, stat, Timer);
+	f_mount(&fs, "", 0);
+	_delay_ms(500);
+	/*
+	print_at_lcd(100,220,CYAN,BLACK,1,"Test1 %x %x %x ",&fil, stat, Timer);
+	f_open(&fil,"0:Names.txt",FA_READ);
+	print_at_lcd(100,220,CYAN,BLACK,1,"Test2 %x %x %x ",&fil, stat, Timer);
 
-	  while(f_gets(output,20,&fil) )   //Read line from File 
-	    printf("%20s",output);
+	while(f_gets(output,20,&fil) )   //Read line from File 
+	printf("%20s",output);
 
-	  f_close(&fil);
-	*/
-	  //f_read (&fil,output,20,&stat);
-	  //print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
-	  //printf("%08s\n\r",output);
- sd_read:
-	  stat=read_ini();
-	  if(stat < 0) {
-	    
-	    if(stat == -1) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"SD File Missing");
-	    if(stat == -2) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Config file Format Error");
-	    if(stat == -3) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Missing Field in File");
-	    do {
-	     if((PINC & 16) == 0 )
-	       goto sd_read;
-	    }
-	     while(1);
-	  }
+	f_close(&fil);
+
+	//f_read (&fil,output,20,&stat);
+	//print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
+	//printf("%08s\n\r",output);*/
+
+//try to read SD
+sd_read:
+	stat=read_ini();
+	if(stat < 0) {
+
+		if(stat == -1) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"SD File Missing");
+		if(stat == -2) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Config file Format Error");
+		if(stat == -3) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Missing Field in File");
+
+		do{
+		 if((PINC & 16) == 0 ) goto sd_read;
+		}
+		while(1);
+	}
 
 //////////////////////////Endlosschleife////////////////////////////////
 	
@@ -518,70 +504,73 @@ int main(void)
 	{	
 	  draw_back(BACK_GRAY);
 	  print_at_lcd(40,220,WHITE, BACK_GRAY ,1, "User:%s KW%d Jahr:%d\n",user_name, KW, YEAR);
-	back:
+
+
+//test if Messadapter is connected
+back:
 	  if((PINA & 2 ) != 2)
-	    {
-	      draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,150,50,1,1,"Missing Adapter");
-	      if((PINC & 16) == 16)
+	  {
+	    draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,150,50,1,1,"Missing Adapter");
+	    if((PINC & 16) == 16)
 		goto back;
-	    }
+	  }
 	  
 	  /*
-	      int fc[]={CYAN,BLACK,BLACK,BLACK};
+		int fc[]={CYAN,BLACK,BLACK,BLACK};
 		int bg[]={BACK_GRAY,GREEN,RED,CYAN};
 		//KA = eeprom_read_word((uint16_t*)8);
-		   
+
 		print_at_lcd(10,220,WHITE, BACK_GRAY ,1, "User:%s KW%d \n",user_name, KW);
 		//YEAR = eeprom_read_word((uint16_t*)12);							  
 		print_at_lcd(205,220,fc[background], bg[background],2, "Jahr:%d\n", YEAR);
 	  */
 
+	  //Wait until battery is inserted
 	  if ((PINA & 4) != 4)
-	    {
-	      draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,2,"Please Insert Battery");
-	      while((PINA &4 ) != 4);
-	   
-	      
-    	    }
+	  {
+	    draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,2,"Please Insert Battery");
+	    while((PINA &4 ) != 4);  
+      }
+
+	  //Test battery
 	  _delay_ms(30); // switch prellung
 	  draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,"Test Battery");
 	  LED_ORA_ON;
-		volt = setLast_readVolt(tst_cur);
-		write_res("0:Res.csv",tst_cur,volt,volt<tst_voltage?"Failed":"Passed");
-		LED_ORA_OFF;	
-		//draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
+	  volt = setLast_readVolt(tst_cur);
+	  write_res("0:Res.csv",tst_cur,volt,volt<tst_voltage?"Failed":"Passed");
+      LED_ORA_OFF;	
+	  //draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
 		
 	
-	       
-		if(volt < tst_voltage)
-		  {
-		    LED_ROT_ON;
-		    draw_back(RED);
-		    sprintf(output, "%2d.%03d V FAILED", volt/1000,(volt%1000));
-		    draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,output);
-		    for(int x=0;x<30;x++)
-		      {
-			_delay_ms(100);
-			if(piezo == 1) {
-			  if(x&1) PIEZZO_ON;
-			    else PIEZZO_OFF;
-			}
-		      }
+	  //Battery not ok or ok
+	  if(volt < tst_voltage)
+	  {
+		LED_ROT_ON;
+		draw_back(RED);
+		sprintf(output, "%2d.%03d V FAILED", volt/1000,(volt%1000));
+		draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,output);
+		for(int x=0;x<30;x++)
+		 {
+		  _delay_ms(100);
+		  if(piezo == 1){
+		   if(x&1) PIEZZO_ON;
+		   else PIEZZO_OFF;
 		  }
-		else {
-		  LED_GRUN_ON;
-		  
-		  if(piezo ==1 ) PIEZZO_ON;
-		  draw_back(GREEN);
-		  sprintf(output, "%2d.%03d V PASSED", volt/1000,(volt%1000));
-		  draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,output);
-		  _delay_ms(3000);
-		}
+		 }
+	  }
+	  else{
+	   LED_GRUN_ON;
+	  
+	   if(piezo ==1 ) PIEZZO_ON;
+	   draw_back(GREEN);
+	   sprintf(output, "%2d.%03d V PASSED", volt/1000,(volt%1000));
+	   draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,output);
+	   _delay_ms(3000);
+	  }
 		
-		
-		LED_ROT_OFF; LED_GRUN_OFF; PIEZZO_OFF;
-		//print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
-		while ((PINA & 4) == 4); //wait until pack is out
-		
+	  //Turn off LED output
+	  LED_ROT_OFF; LED_GRUN_OFF; PIEZZO_OFF;
+	  //print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
+	  while ((PINA & 4) == 4); //wait until pack is out
 	}
 }
