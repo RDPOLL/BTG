@@ -19,6 +19,8 @@
 #include "Volt.h"
 #include "Gear.h"
 
+#define TEXTSIZE 2
+
 
 
 
@@ -233,7 +235,7 @@ void draw_box(int x,int y , int sx, int sy, int len , int flag)
 void draw_button(int x, int y, int sx, int sy, int len ,int flag, char * text)
 {
  draw_box(x,y,sx,sy,len,flag);
- print_at_lcd(x+len+15, y+len + (sy/2) - 4, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),1,text);
+ print_at_lcd(x+len+15, y+len + (sy/2) - 4, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),TEXTSIZE,text);
 }
 
 void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
@@ -259,7 +261,7 @@ void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
   }
   draw_box(x,y,sx,sy,3,flag);
   ili9341_drawXBitmap(x+10,y+((sy/2) - (h/2)),pics,w,h, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0));
-  print_at_lcd(x+w+15, y+((sy/2)- (h/2)),  (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),1,text );
+  print_at_lcd(x+w+15, y+((sy/2)- (h/2)),  (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),TEXTSIZE,text );
 }
 
 
@@ -488,8 +490,8 @@ sd_read:
 	if(stat < 0) {
 
 		if(stat == -1) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"SD File Missing");
-		if(stat == -2) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Config file Format Error");
-		if(stat == -3) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"Missing Field in File");
+		if(stat == -2) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"File Error");
+		if(stat == -3) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"File Incomplete");
 
 		do{
 		 if((PINC & 16) == 0 ) goto sd_read;
@@ -528,7 +530,7 @@ back:
 	  //Wait until battery is inserted
 	  if ((PINA & 4) != 4)
 	  {
-	    draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,2,"Please Insert Battery");
+	    draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,2,"Insert Battery");
 	    while((PINA &4 ) != 4);  
       }
 
