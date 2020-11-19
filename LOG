@@ -1,0 +1,300 @@
+commit c9a327c8217a83929a3181693aeaf0098bed65b6
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Nov 19 19:52:19 2020 +0100
+
+    Added origin of the files
+            modified:   Doku/Doku-BTG.docx
+
+commit 41d733382cd23f4ff91c4165fcde77145ef0b469
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Wed Nov 18 08:14:06 2020 +0100
+
+    Fixed Textsize
+
+commit 8655f601e80338fd68bd4e14eba2c078c9cc6a0c
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Fri Nov 13 15:36:46 2020 +0100
+
+    some clean up
+
+commit 8c3260edab663d66bc004bdd55ca1cd7e96f040c
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Nov 12 13:22:22 2020 +0100
+
+    Update Bedienungsanleitung.docx
+
+commit 33ed359519846351b2b0d03a3617b41a3925bb60
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Nov 12 10:22:47 2020 +0100
+
+    Update Bedienungsanleitung.docx
+
+commit 510c60bab9df4ea73e676280541d91c824fd8b75
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Nov 12 10:15:38 2020 +0100
+
+    Update Bedienungsanleitung.docx
+
+commit 9785e3839d5a99a5afbcad41597cbb006055fb26
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Nov 12 07:46:38 2020 +0100
+
+    Text fixed
+
+commit f57d30e80e7e5e05a424ffb3e87d521d9de70472
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Fri Nov 6 15:34:20 2020 +0100
+
+    logo corrections
+
+commit 0c6b8148de34cec337f971794cd6be20d619cdff
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Fri Nov 6 10:07:02 2020 +0100
+
+    SD init
+
+commit a768fba1638ccefdca0702b042a713216d07a78e
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Nov 5 21:24:21 2020 +0100
+
+    Forgat add PROGMEM in Gear.h
+    And.. Fixed SD Card Proble @ powerup. Looks like some Cards need more time or clk cycles to fully start..
+    So there is now a retry_cnt, if initialisation fail first, it try again (max 3 times) .
+            modified:   Gear.h
+            modified:   fatfs/mmc_avr_spi.c
+
+commit ea13aac0a56df21a0620766727ca5e8c4c8f5582
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Nov 5 14:00:53 2020 +0100
+
+    increased delay after power on... SD Specifications say up to 35ms .. so increased it to 100ms
+            modified:   fatfs/mmc_avr_spi.c
+
+commit 80298e51fd375295b72616bc15b1b8ebdaf7578e
+Merge: b760d49 9df5a78
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Nov 5 13:35:40 2020 +0100
+
+    Merge branch 'main' of https://github.com/RDPOLL/BTG into main
+
+commit 9df5a78e56c1b1c42d03c044edfc6d87aad059a9
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Nov 5 13:34:05 2020 +0100
+
+    schema
+
+commit b760d49e82607a55bf9d531924345c614ed0f385
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Nov 5 13:31:46 2020 +0100
+
+    Added delay after power up SD Card... just to relax time for the card
+            modified:   fatfs/mmc_avr_spi.c
+
+commit 8225b9aedabed11e1319d85211b4dc07f0d256fe
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Nov 5 12:17:23 2020 +0100
+
+    msg box fix
+
+commit bbd7967b86a23e800c39127b763179d04ae52c25
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Nov 5 08:56:26 2020 +0100
+
+    Forgat Gear.h to add.
+            new file:   Gear.h
+            modified:   Makefile
+            modified:   main.c
+
+commit b83279bf3f11b5264c81e47f8efef2afb2ba3617
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Sun Nov 1 20:32:29 2020 +0100
+
+    made chages to Makefiles to simplify linking ... now it checks also the fatfs makefile and creates the archive file.
+            modified:   Makefile
+            modified:   fatfs/Makefile_mmc
+
+commit 20f37f33f68fc510fe1bca44e88de9a74f3dac30
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Sat Oct 31 19:14:47 2020 +0100
+
+    Forgat Volt.h
+            new file:   Volt.h
+
+commit 2a5f018a458482d8fc2f12cbc68c6918c1262ac3
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Sat Oct 31 16:39:53 2020 +0100
+
+    Cleanup for end user, added "failed"/"passed" field in csv.
+    Now the display changes when batery failes or passes.
+    
+            modified:   README.md
+            modified:   main.c
+
+commit 571f732ad593356e820113030d7f2afe8119c60e
+Merge: 84e232d 101690a
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Sat Oct 31 15:07:31 2020 +0100
+
+    Merge branch 'main' of https://github.com/RDPOLL/BTG into main
+
+commit 84e232dec988c6511937dfb92bb1a0cdfeb7bbaf
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Sat Oct 31 15:04:31 2020 +0100
+
+    Added doc dir, added icons for graphics, added write support,
+    put ifdef around uneeded function to make smaller image.
+    
+            new file:   Achtung.h
+            modified:   Makefile
+            new file:   Stop.h
+            new file:   doc/cur.dat
+            new file:   doc/main.png
+            new file:   doc/prg_flow.dot
+            new file:   doc/read.ini
+            new file:   doc/volt.dat
+            modified:   fatfs/ffconf.h
+            modified:   fatfs/mmc_avr_spi.c
+            modified:   ili9341.c
+            modified:   ili9341.h
+            modified:   main.c
+            modified:   uart.c
+
+commit 101690a195bbf614546365183ac81e347aa97b03
+Merge: b200700 e39c0a4
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Fri Oct 30 08:05:16 2020 +0100
+
+    Merge branch 'main' of https://github.com/RDPOLL/BTG into main
+
+commit b200700b7b2eb7439e38b26dd4280362c33b6954
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Fri Oct 30 08:04:36 2020 +0100
+
+    doku
+
+commit e39c0a42b2ec3c97f445c5abd8ca82976e5beb1d
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Wed Oct 28 21:41:42 2020 +0100
+
+    added comment to "read.ini" stuff and remove debug stuff from fatfs
+            modified:   fatfs/ff.c
+            modified:   main.c
+
+commit 35299bded5222b8f27332c0a506ee020c147088a
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Wed Oct 28 21:19:23 2020 +0100
+
+    Modification due to adc conversations.
+    
+            modified:   main.c
+
+commit f5b1ebf12abd90feb7890b6f214e70fc02948836
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Sun Oct 25 16:18:37 2020 +0100
+
+    added chan's fatfs for sd support
+    clean up will be needed as there are too many files. For now everything is added.
+    
+            modified:   main.c
+            modified:   uart.c
+
+commit 28682e3901f3a6c75df47a6f3c152304bc5d7205
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Fri Oct 23 11:59:13 2020 +0200
+
+    Update main.c
+
+commit 972e96784b4421035f958ae1bf395c723ac3079a
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Fri Oct 23 09:41:56 2020 +0200
+
+    some more clean up (I2C removed)
+
+commit 6f0eee48ee0d07d16d2799dd3f5f20fa74de144c
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Oct 22 20:26:39 2020 +0200
+
+    Consistent F_CPU (uart.c had a wrong definition ) now F_CPU only in Makefile change !!!
+    More cleanup to keep gcc happy.
+    
+            modified:   ili9341.c
+            modified:   uart.c
+
+commit c7ed1f74182d08c0de496db904585c37ddb434cd
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Oct 22 20:21:34 2020 +0200
+
+    More cleanup, moved F_CPU to makefile so all delay.h are ok.
+    Changes with adc -> include adc.h not adc.c
+    Changes to keep gcc happy about declarations.
+    
+            modified:   ADC.c
+            modified:   Makefile
+            new file:   adc.h
+            modified:   ili9341.c
+    
+            modified:   main.c
+
+commit 0b856ec65d625ba39feee08db61677b9fb3cb1f0
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Thu Oct 22 19:49:06 2020 +0200
+
+    Remove unneeded file ..
+    
+            deleted:    byteordering.c
+            deleted:    byteordering.h
+            deleted:    byteordering.o
+
+commit 64c0faab49e65144ebcb78e7eea2bd52e9ee087b
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Oct 22 15:40:06 2020 +0200
+
+    analog
+
+commit caa9e385338474f572852ae1a0dea232faafc5db
+Author: RDPOLL <52659283+RDPOLL@users.noreply.github.com>
+Date:   Thu Oct 22 08:10:55 2020 +0200
+
+    Clean Up
+
+commit 5efa2de9759557e9f53d36e71a07fb7fbe8d3902
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Wed Oct 21 20:47:02 2020 +0200
+
+            modified:   ili9341.c
+            modified:   ili9341.h
+            modified:   main.c
+
+commit df24c87263586065d0741a51d99a5a0084a7f495
+Author: roman65536 <roman65536@yahoo.com>
+Date:   Sun Oct 18 15:27:53 2020 +0200
+
+     Changes to be committed:
+            modified:   Makefile
+            modified:   ili9341.c
+            modified:   ili9341.h
+            modified:   main.c
+
+commit 1dcddd0047fa773f82d496672cf4a96031dfec93
+Author: POLL <test@globsö.com>
+Date:   Fri Oct 9 17:00:40 2020 +0200
+
+    Update main.c
+
+commit d09b621554874a3bc9050b5da6bd29119d554511
+Author: POLL <test@globsö.com>
+Date:   Fri Oct 9 11:51:31 2020 +0200
+
+    small changes
+
+commit fce4df211004c6350a78f52ce708bfc9bdaf9e7d
+Author: romanp <romanp@roman2>
+Date:   Fri Oct 9 08:00:05 2020 +0200
+
+    all c header files
+
+commit 5638013f2bdad1df5fa502633dbf1c3494fa2d3f
+Author: romanp <romanp@roman2>
+Date:   Fri Oct 9 07:56:02 2020 +0200
+
+    first
