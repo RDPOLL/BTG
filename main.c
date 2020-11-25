@@ -21,9 +21,6 @@
 
 #define TEXTSIZE 2
 
-
-
-
 #define logo_width 100
 #define logo_height 23
 static const unsigned char logo_bits[] PROGMEM = {
@@ -74,7 +71,6 @@ static const unsigned char logo_bits[] PROGMEM = {
 
 #define linearOffset 0		//Offset in mA
 #define gainOffset 260
-// Original 280
 
 extern uint16_t _width ;
 extern uint16_t _height;
@@ -112,53 +108,6 @@ void messInit(void )
 //------------------------------------------------
 }
 
-#if 0
-unsigned short setLast_readVolt(unsigned short sollStrom)
-{
-		unsigned short istStrom = 0;
-		unsigned short volt = 0;
-		unsigned char i = 0;
-		
-//Strommessung: Durchschnitt aus 10 Messungen wird genommen
-//---------------------------------------------------------
-		istStrom = 0;
-		for(i = 10; i > 0; i--)
-		{
-			istStrom += ((((long)read_ADC(4)) * 1000) / gainOffset);
-		}
-		istStrom /= 10;
-
-		istStrom += linearOffset;
-		
-		//Offset des ADC kompensieren
-		
-//Spannung wird gemessen		
-//--------------------------------------------------------------
-
-		volt = (((long)read_ADC(3)) * 10000) / 2046;		
-		volt *= 6;
-		//volt *= 10;
-		//volt = read_ADC(3);
-		
-//Kontroll Code: Steuern des Mosfets
-//--------------------------------------------------------------
-		if((istStrom < sollStrom) && (pwm < 255))
-		{
-			if(pwm == 0)
-			  pwm = 150+(sollStrom/3);
-			pwm++;
-		}
-		if((istStrom > sollStrom) && (pwm > 0)) pwm--;
-		if(sollStrom == 0) pwm = 0;
-//--------------------------------------------------------------
-		printf("%s ist %d soll: %d pwm: %d volt: %d\n",__FUNCTION__,istStrom,sollStrom,pwm, volt);
-
-		OCR2B = pwm;
-
-		return volt;
-}
-
-#else
 unsigned short setLast_readVolt(unsigned short sollStrom)
 {
   unsigned int volt, cur;
@@ -198,9 +147,6 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
   
   return volt;
 }
-
-#endif
-
 
 void print_at_lcd(int x, int y, int fc, int bc, int fs, const char * fmt, ...)
 {
@@ -352,7 +298,6 @@ int read_ini()
   
 }
 
-
 int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
 {
 
@@ -378,7 +323,6 @@ int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
 
    return 0;
 }
-
 
 
 //////////////////////////////////////Hauptprogramm///////////////////////////////////////
@@ -460,29 +404,14 @@ int main(void)
 
 ////////////////////////////////////////////////////////////////////////
 
-	TRANSISTOR_OFF;						//Ton ausschalten / nur beim Programmieren notwenig
-	//piezo = eeprom_read_word((uint16_t *) 4);					
-		
-	//print_at_lcd(130, 180, YELLOW, BACK_GRAY, 2, "RUAG Schweiz AG");
+	TRANSISTOR_OFF;						//Ton ausschalten / nur beim Programmieren notwenig					
+
 	draw_back(BACK_GRAY);
 
 	draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,3,3,"Booting..");
 
 	f_mount(&fs, "", 0);
 	_delay_ms(500);
-	/*
-	print_at_lcd(100,220,CYAN,BLACK,1,"Test1 %x %x %x ",&fil, stat, Timer);
-	f_open(&fil,"0:Names.txt",FA_READ);
-	print_at_lcd(100,220,CYAN,BLACK,1,"Test2 %x %x %x ",&fil, stat, Timer);
-
-	while(f_gets(output,20,&fil) )   //Read line from File 
-	printf("%20s",output);
-
-	f_close(&fil);
-
-	//f_read (&fil,output,20,&stat);
-	//print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
-	//printf("%08s\n\r",output);*/
 
 //try to read SD
 sd_read:
@@ -516,16 +445,6 @@ back:
 	    if((PINC & 16) == 16)
 		goto back;
 	  }
-	  
-	  /*
-		int fc[]={CYAN,BLACK,BLACK,BLACK};
-		int bg[]={BACK_GRAY,GREEN,RED,CYAN};
-		//KA = eeprom_read_word((uint16_t*)8);
-
-		print_at_lcd(10,220,WHITE, BACK_GRAY ,1, "User:%s KW%d \n",user_name, KW);
-		//YEAR = eeprom_read_word((uint16_t*)12);							  
-		print_at_lcd(205,220,fc[background], bg[background],2, "Jahr:%d\n", YEAR);
-	  */
 
 	  //Wait until battery is inserted
 	  if ((PINA & 4) != 4)
@@ -541,9 +460,7 @@ back:
 	  volt = setLast_readVolt(tst_cur);
 	  write_res("0:Res.csv",tst_cur,volt,volt<tst_voltage?"Failed":"Passed");
       LED_ORA_OFF;	
-	  //draw_button(10, 10 , 150 , 40 , 2 , 0 , "Batterie Test Geraet");
 		
-	
 	  //Battery not ok or ok
 	  if(volt < tst_voltage)
 	  {
@@ -572,7 +489,6 @@ back:
 		
 	  //Turn off LED output
 	  LED_ROT_OFF; LED_GRUN_OFF; PIEZZO_OFF;
-	  //print_at_lcd(100,220,CYAN,BLACK,1,"Test %x %x %x ",&fil, stat, Timer);
 	  while ((PINA & 4) == 4); //wait until pack is out
 	}
 }
