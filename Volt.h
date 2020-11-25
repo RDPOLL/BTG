@@ -1,3 +1,9 @@
+/*
+	Author: Lucas Pollak
+	Date: 	25.11.2020
+	Description:
+	Bitmap for measurementsign
+*/
 #define volt_width 30
 #define volt_height 30
 static const unsigned char volt_bits[] PROGMEM = {

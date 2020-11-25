@@ -1,16 +1,13 @@
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-#include <avr/eeprom.h>
-#include <util/delay.h>
-
-
-#include <stdlib.h>
-#include <inttypes.h>
-
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#include <avr/eeprom.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <inttypes.h>
 
 /*
  *		This Libary is used to Initialise and read the ADC
- * 		of the atmega1284p. For Register discription use the Datasheet
+ * 		of the atmega644. For Register discription use the Datasheet
  * 		of the uP.
  * 
  * 		For 5V fullscale use this formula to calculate the coresponding voltage:

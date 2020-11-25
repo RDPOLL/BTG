@@ -1,3 +1,9 @@
+/*
+	Author: Lucas Pollak
+	Date: 	25.11.2020
+	Description:
+	Bitmap for Stopsign
+*/
 #define Stop_width 30
 #define Stop_height 30
 static const unsigned char Stop_bits[] PROGMEM = {

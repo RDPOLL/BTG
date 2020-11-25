@@ -1,3 +1,18 @@
+/*
+	Author: Justin Rhyner, Lukas Rietman, Michael Pluess, Lucas Pollak
+	Date:	25.11.2020
+	Location: Duebendorf
+
+	Description:
+	This code is used to control the hardware of the "Batterietestgeraet". This device meassures the
+	voltage of a batterypack with or without load. All configuration data like loadcurrent is
+	taken from an SD-card.
+
+	Libary documentation:
+	Fatfs:				http://elm-chan.org/fsw/ff/00index_e.html
+	Uart.c/uart.h:		http://www.roland-riegel.de
+	ili9341 Display:	https://www.avrfreaks.net/projects/ili9341-library-drive-22-tft-displayderived-adafruit-tft-library-ili9340-type-controller
+*/
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
@@ -19,8 +34,10 @@
 #include "Volt.h"
 #include "Gear.h"
 
+//define textsize of the display
 #define TEXTSIZE 2
 
+//Bitmap for RUAG logo
 #define logo_width 100
 #define logo_height 23
 static const unsigned char logo_bits[] PROGMEM = {
@@ -50,9 +67,8 @@ static const unsigned char logo_bits[] PROGMEM = {
    0x00, 0x00, 0x00, 0x00, 0xa0, 0xbb, 0x1b, 0x20, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0x1f, 0x10, 0x00, 0x00 };
 
-
+//gray background for display
 #define BACK_GRAY (LCD_RGB(32,32,32))
-
 
 #define LED_ORA_ON      PORTB|= (1<<PB1)
 #define LED_ORA_OFF		PORTB &= ~(1<<PB1)
@@ -65,37 +81,39 @@ static const unsigned char logo_bits[] PROGMEM = {
 #define TRANSISTOR_ON	PORTC |= (1<<PC7)
 
 #define PIEZZO_OFF		PORTC &= ~((1<<PC6)| (1<<PC7))
-#define PIEZZO_ON		PORTC |= ((1<<PC6) | (1<<PC7) )
+#define PIEZZO_ON		PORTC |= ((1<<PC6) | (1<<PC7))
 #define LED_BAT_ON		PORTD |= (1<<PD0)
 #define LED_BAT_OFF		PORTD &= ~(1<<PD0)
 
 #define linearOffset 0		//Offset in mA
-#define gainOffset 260
+#define gainOffset 260		//Gainoffset for current measurement
 
+//dimensions of display
 extern uint16_t _width ;
 extern uint16_t _height;
 
+//pwm variables
 unsigned short pwm = 0;
 unsigned short pwm_offset=150;
-unsigned short tst_voltage=12000; // default test voltage in mV
-unsigned short tst_cur=50;    // default test current in mA 
-unsigned char piezo=0;     // Lautsprecher ein-/ausschalten (PIEZO-Summer)
-unsigned char debug=1;     // if >0 show debug infos @serial
 
-uint16_t KA = 0;
+unsigned short tst_voltage=12000; 	// default test voltage in mV
+unsigned short tst_cur=50;    		// default test current in mA 
+unsigned char piezo=0;     			// PIEZO-speaker
+
+// if >0 show debug infos @serial
+unsigned char debug=1;    			
+
+//Date variables
 uint16_t KW = 0;
-uint16_t Jahr = 0;
 uint16_t YEAR = 0;
-char *user_name;
-uint8_t	 background = 0;	
 
+char *user_name;
 
 
 ////////////////////////////////////////////////////////////////////////
 
 static FILE lcd_out = FDEV_SETUP_STREAM(ili9341_putchar_printf, NULL, _FDEV_SETUP_WRITE);
 static FILE mydata2 = FDEV_SETUP_STREAM(uart_putchar_printf, NULL, _FDEV_SETUP_WRITE);
-
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -108,6 +126,7 @@ void messInit(void )
 //------------------------------------------------
 }
 
+//sets loadcurrent and reads the batteryvoltage
 unsigned short setLast_readVolt(unsigned short sollStrom)
 {
   unsigned int volt, cur;
@@ -116,12 +135,12 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
 
   pwm=(sollStrom/3) + pwm_offset;
   _delay_ms(100);
-  //OCR2B=0;
+
   adc1=read_ADC(3);
   if(adc1>0) volt=(adc1*29)+170;
+  
   adc2=read_ADC(4);
   if(adc2 >0) cur= (adc2*3200/1000)+13;
-  //printf("%s: adc1: %d adc2: %d volt: %d cur: %d \n",__FUNCTION__,adc1,adc2,volt,cur);
 
   OCR2B=(pwm);
   _delay_ms(200);
@@ -148,6 +167,7 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
   return volt;
 }
 
+//prints a variabel to the display
 void print_at_lcd(int x, int y, int fc, int bc, int fs, const char * fmt, ...)
 {
   va_list args;
@@ -178,12 +198,14 @@ void draw_box(int x,int y , int sx, int sy, int len , int flag)
   }
 }
 
+//draw button on the display
 void draw_button(int x, int y, int sx, int sy, int len ,int flag, char * text)
 {
  draw_box(x,y,sx,sy,len,flag);
  print_at_lcd(x+len+15, y+len + (sy/2) - 4, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),TEXTSIZE,text);
 }
 
+//draw meassagebox on display
 void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
 {
   int w,h;
@@ -210,11 +232,12 @@ void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
   print_at_lcd(x+w+15, y+((sy/2)- (h/2)),  (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),TEXTSIZE,text );
 }
 
-
+//see:	https://www.arduino.cc/reference/en/language/functions/math/map/
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+//draw progressbar on display
 void draw_progress(int x, int y, int sx, int sy, int len, int prog)
 {
  int a,mlen=sx-(2*len)-6;
@@ -226,6 +249,7 @@ void draw_progress(int x, int y, int sx, int sy, int len, int prog)
  }
 }
 
+//set backgroundcolour
 void draw_back(int bc)
 {
  ili9341_clear(bc);
@@ -256,11 +280,7 @@ year = [integer number]
 week = [integer number]
 name = [string]
 pwm_offset = [integer number]
-
-
-
 */
-
 int read_ini()
 {
   FIL file ;
@@ -295,18 +315,16 @@ int read_ini()
   if(tst != 31 ) return -3; // missing fields
   else
     return 0;
-  
 }
 
+//write result of meassurement to sd-card
 int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
 {
-
    FIL file ;
    int stat;
    char fname[16];
    char line[80];
    int len;
-
   
    printf("%s2 open returned %d \n\r",__FUNCTION__,stat);
    stat=f_open(&file, name,FA_OPEN_APPEND | FA_WRITE );

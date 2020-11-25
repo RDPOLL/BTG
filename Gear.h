@@ -1,3 +1,9 @@
+/*
+	Author: Lucas Pollak
+	Date: 	25.11.2020
+	Description:
+	Bitmap for gearsign
+*/
 #define Gear_width 30
 #define Gear_height 30
 static const unsigned char Gear_bits[] PROGMEM = {

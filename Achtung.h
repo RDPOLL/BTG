@@ -1,3 +1,9 @@
+/*
+	Author: Lucas Pollak
+	Date: 	25.11.2020
+	Description:
+	Bitmap for cautionsign
+*/
 #define Achtung_width 30
 #define Achtung_height 30
 static const unsigned char Achtung_bits[] PROGMEM = {
