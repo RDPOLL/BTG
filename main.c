@@ -98,7 +98,7 @@ unsigned short pwm_offset=150;
 
 unsigned short tst_voltage=12000; 	// default test voltage in mV
 unsigned short tst_cur=50;    		// default test current in mA 
-unsigned char piezo=0;     			// PIEZO-speaker
+unsigned char piezo=0;     			// PIEZO speaker
 
 // if >0 show debug infos @serial
 unsigned char debug=1;    			
@@ -133,32 +133,42 @@ unsigned short setLast_readVolt(unsigned short sollStrom)
   unsigned int adc1,adc2;
   int a,i;
 
+  //preset pwm to known level
   pwm=(sollStrom/3) + pwm_offset;
   _delay_ms(100);
 
+  //read battvoltage
   adc1=read_ADC(3);
   if(adc1>0) volt=(adc1*29)+170;
   
   adc2=read_ADC(4);
   if(adc2 >0) cur= (adc2*3200/1000)+13;
 
+  //output pwm
   OCR2B=(pwm);
   _delay_ms(200);
+
+  //take average of 15 voltage meassurements
   for(a=0;a<15;a++){
     cur=0;
+    //take average of 10 current meassurements
     for(i=0;i<10;i++) {
       adc2=read_ADC(4);
       if(adc2 >0) cur+= ((long)adc2*3200/1000)+13; else cur+=0;
     }
     cur/=10;
-    
+
+    //adjust pwm
 	if((cur+1) < sollStrom) pwm ++;
 	if((cur-1) > sollStrom) pwm --;
 	OCR2B=pwm;
 	_delay_ms(200);   //stabilize pwm and current meassure
+	
+	//debug output
 	if(debug > 0 ) printf("%s: adc1: %d adc2: %d volt: %d cur: %d pwm %d porta %x\n",__FUNCTION__,adc1,adc2,volt,cur, pwm,PINA );
   }
 
+  //read battvoltage
   adc1=read_ADC(3);
   if(adc1>0) volt=(adc1*29)+170; else volt =0;
 
@@ -173,8 +183,8 @@ void print_at_lcd(int x, int y, int fc, int bc, int fs, const char * fmt, ...)
   va_list args;
   char buf[80];
   
-  ili9341_setcursor(x, y);									//
-  ili9341_settextcolour(fc,bc);							//
+  ili9341_setcursor(x, y);
+  ili9341_settextcolour(fc,bc);
   ili9341_settextsize(fs);
   va_start(args, fmt);
   vsnprintf(buf,80,fmt,args);
@@ -188,8 +198,11 @@ void draw_box(int x,int y , int sx, int sy, int len , int flag)
   int lcolor1=(flag==1)?LCD_RGB(0x70,0x70,0x70):LCD_RGB(0xf0,0xf0,0xf0);
   int lcolor2=(flag==1)?LCD_RGB(0xf0,0xf0,0xf0):LCD_RGB(0x70,0x70,0x70);
   int a;
-  
+
+  //draw box
   ili9341_fillrect(x+len,y+len,sx-(2*len),sy-(2*len),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80));
+
+  //draw lines around the box
   for(a=0;a<=len;a++){
    ili9341_drawhline(x+a,y+a,sx-(2*a),lcolor1);
    ili9341_drawhline(x+a,(y+sy)-a,sx-(2*a),lcolor2);
@@ -211,6 +224,7 @@ void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
   int w,h;
   const unsigned char * pics;
 
+  //choose between different pics
   switch (which){
    case 0:
     w=volt_width; h=volt_height; pics=volt_bits;
@@ -227,6 +241,8 @@ void draw_msg(int x, int y, int sx, int sy, int flag, int which, char * text)
    break; 
 
   }
+
+  //draw msg box
   draw_box(x,y,sx,sy,3,flag);
   ili9341_drawXBitmap(x+10,y+((sy/2) - (h/2)),pics,w,h, (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0));
   print_at_lcd(x+w+15, y+((sy/2)- (h/2)),  (flag==1)?LCD_RGB(255,255,255):LCD_RGB(0,0,0),(flag==1)?LCD_RGB(0x50,0x50,0x50):LCD_RGB(0x80,0x80,0x80),TEXTSIZE,text );
@@ -241,7 +257,7 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
 void draw_progress(int x, int y, int sx, int sy, int len, int prog)
 {
  int a,mlen=sx-(2*len)-6;
-
+	
  draw_box(x,y,sx,sy,len,0);
  for(a=0;a<(sy-(2*len)-6);a++)
  {
@@ -436,6 +452,7 @@ sd_read:
 	stat=read_ini();
 	if(stat < 0) {
 
+		//react to different errors
 		if(stat == -1) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"SD File Missing");
 		if(stat == -2) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"File Error");
 		if(stat == -3) draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,"File Incomplete");
@@ -450,7 +467,8 @@ sd_read:
 	
 	  
 	while(1)  
-	{	
+	{
+	  //show sd-data  
 	  draw_back(BACK_GRAY);
 	  print_at_lcd(40,220,WHITE, BACK_GRAY ,1, "User:%s KW%d Jahr:%d\n",user_name, KW, YEAR);
 
@@ -472,7 +490,7 @@ back:
       }
 
 	  //Test battery
-	  _delay_ms(30); // switch prellung
+	  _delay_ms(30); //switch prellung
 	  draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,"Test Battery");
 	  LED_ORA_ON;
 	  volt = setLast_readVolt(tst_cur);
