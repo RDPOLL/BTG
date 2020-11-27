@@ -259,6 +259,8 @@ void draw_progress(int x, int y, int sx, int sy, int len, int prog)
  int a,mlen=sx-(2*len)-6;
 	
  draw_box(x,y,sx,sy,len,0);
+
+ //draw progressbar
  for(a=0;a<(sy-(2*len)-6);a++)
  {
   ili9341_drawhline(x+len+3,y+len+3+a,map(prog,0,100,0,mlen),LCD_RGB(0xf0,0,0));
@@ -346,7 +348,6 @@ int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
    stat=f_open(&file, name,FA_OPEN_APPEND | FA_WRITE );
    printf("%s3 open returned %d \n\r",__FUNCTION__,stat);
    if(stat != FR_OK) return -1;
-   //f_printf(&file,"%s;%d;%d;%d;%d\n\r",user_name,YEAR,KW,cur,volt);
    sprintf(line,"%s;%d;%d;%d;%d;%s\n",user_name,YEAR,KW,cur,volt,txt);
    f_write(&file,line,strlen(line),&len);
    printf("%s4 open returned %d \n\r",__FUNCTION__,stat);
@@ -363,9 +364,11 @@ int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
 
 int main(void)
 {
+	//output string
 	char output[20];
 	unsigned short volt = 0;
-	
+
+	//Fatfile system
     FRESULT fr;
     FATFS fs;
     FIL fil;
@@ -423,14 +426,15 @@ int main(void)
 
 	uart_init();
 
+	//preparing output file
 	stdout = &mydata2;
 	printf("Booting..");
+	
 	messInit();
 
 	//Display init
 	ili9341_init();						//initial driver setup to drive ili9341
 	ili9341_clear(BACK_GRAY);			//fill screen with black colour
-	//_delay_ms(1000);
 	ili9341_setRotation(3);				//rotate screen
 	_delay_ms(2);
 
@@ -444,6 +448,7 @@ int main(void)
 
 	draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,3,3,"Booting..");
 
+	//mount SD-card
 	f_mount(&fs, "", 0);
 	_delay_ms(500);
 
@@ -468,7 +473,7 @@ sd_read:
 	  
 	while(1)  
 	{
-	  //show sd-data  
+	  //show sd data  
 	  draw_back(BACK_GRAY);
 	  print_at_lcd(40,220,WHITE, BACK_GRAY ,1, "User:%s KW%d Jahr:%d\n",user_name, KW, YEAR);
 
@@ -493,17 +498,26 @@ back:
 	  _delay_ms(30); //switch prellung
 	  draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,"Test Battery");
 	  LED_ORA_ON;
+
+	  //set load current and read battery voltage
 	  volt = setLast_readVolt(tst_cur);
+
+	  //write meassure data to sd card file
 	  write_res("0:Res.csv",tst_cur,volt,volt<tst_voltage?"Failed":"Passed");
+
       LED_ORA_OFF;	
 		
-	  //Battery not ok or ok
+	  //Battery not ok
 	  if(volt < tst_voltage)
 	  {
 		LED_ROT_ON;
 		draw_back(RED);
+
+		//output negative result to display
 		sprintf(output, "%2d.%03d V FAILED", volt/1000,(volt%1000));
 		draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,1,output);
+
+		//acoustic output
 		for(int x=0;x<30;x++)
 		 {
 		  _delay_ms(100);
@@ -512,14 +526,21 @@ back:
 		   else PIEZZO_OFF;
 		  }
 		 }
+		 
 	  }
+	  //battery voltage ok
 	  else{
 	   LED_GRUN_ON;
-	  
+
+	   //turn on acoustic output.
 	   if(piezo ==1 ) PIEZZO_ON;
+	   
 	   draw_back(GREEN);
+
+	   //output positive result to display
 	   sprintf(output, "%2d.%03d V PASSED", volt/1000,(volt%1000));
 	   draw_msg((ILI9341_TFTWIDTH/2) -(250/2),90,250,50,1,0,output);
+	   
 	   _delay_ms(3000);
 	  }
 		
