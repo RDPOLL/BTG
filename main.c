@@ -309,18 +309,27 @@ int read_ini()
   int st;
   int tst=0;
 
-  stat=f_open(&file,"0:read.ini",FA_READ);
+  stat=f_open(&file,"0:read.ini",FA_READ);             // try to open the "read.ini" file 
   printf("%s: open returned %d",__FUNCTION__,stat);
-  if (stat != FR_OK) return -1;
-  while(f_gets(line,80,&file) )
+  if (stat != FR_OK) return -1;                       // if f_open returned error return 
+  while(f_gets(line,80,&file) )                       // read the file line by line -> current line im "line" variable
   {
-   if(line[0] == 0) continue; // probably newline
-   if(line[0] == '#') continue;
-   st=sscanf(line,"%s = %16[^\n]",cmd,var) ;
+	if(line[0] == 0) continue;                       // check whether is an empty line, if so ignore -> probably newline    
+	if(line[0] == '#') continue;                     // check if its an comment, comment is always when the first character in the line is an "#"
+	st=sscanf(line,"%s = %16[^\n]",cmd,var) ;         // read the variable name and its coresponding value separated by "="
+	                                                  // the %16[^\n] means, it reads max 16 characters even it is an space " " until end of line or newline
+	                                                  // this way scanf can also read name such as "hans muster" 
    printf("%s: %s %s scanf %d\n\r",__FUNCTION__,cmd,var,st);
-   if(st != 2) return -2; // Format Error
-   if(strcmp(cmd,"week")==0) { KW=atoi(var); tst|= 1; } // flag for week
-   if(strcmp(cmd,"year")==0) { YEAR=atoi(var); tst|=2; } // flag for year
+   if(st != 2) return -2;                             // if sscanf didn't return two convertions return Format Error
+   
+                                                      // following is tricky, as we read the variables, when find, we set the values
+                                                      // depending on the variable (whether is string, integer) we duplicate the string (since "var" will be reused)
+                                                      // or atoi it to an numerical value
+                                                      // furthermore for variables which "must" be set in the file, we set an coresponding flag to "tst" whether we found the variable in the config file
+                                                      // those "must" are week,year,name, voltage, current
+                                                      // if one of the is missing, later will be returned an missing field!
+   if(strcmp(cmd,"week")==0) { KW=atoi(var); tst|= 1; }          // flag for week
+   if(strcmp(cmd,"year")==0) { YEAR=atoi(var); tst|=2; }         // flag for year
    if(strcmp(cmd,"name")==0) { user_name=strdup(var); tst|= 4; } // flag for name
    if(strcmp(cmd,"pwm_offset")==0) pwm_offset=atoi(var);
    if(strcmp(cmd,"piezo")==0) piezo=atoi(var);
@@ -329,13 +338,17 @@ int read_ini()
    if(strcmp(cmd,"current")==0) { tst_cur=atoi(var); tst|=16; } 
   }
   
-  f_close(&file);
-  if(tst != 31 ) return -3; // missing fields
+  f_close(&file);                                   // close the file
+  if(tst != 31 ) return -3;                         // check for missing fields
   else
     return 0;
 }
 
 //write result of meassurement to sd-card
+//
+// this function will create if not exist or append, results to a file "name"
+// basicly it will be a csv file, so it can be read by excel or other spreadsheet
+
 int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
 {
    FIL file ;
@@ -345,15 +358,16 @@ int write_res(char *name, unsigned short cur, unsigned short volt, char *txt )
    int len;
   
    printf("%s2 open returned %d \n\r",__FUNCTION__,stat);
-   stat=f_open(&file, name,FA_OPEN_APPEND | FA_WRITE );
+   stat=f_open(&file, name,FA_OPEN_APPEND | FA_WRITE );             // open the file "name" for write and append
    printf("%s3 open returned %d \n\r",__FUNCTION__,stat);
-   if(stat != FR_OK) return -1;
-   sprintf(line,"%s;%d;%d;%d;%d;%s\n",user_name,YEAR,KW,cur,volt,txt);
-   f_write(&file,line,strlen(line),&len);
+   if(stat != FR_OK) return -1;                                    // check whether open returned error 
+   sprintf(line,"%s;%d;%d;%d;%d;%s\n",user_name,YEAR,KW,cur,volt,txt);     // prepare the csv line which will be apppended to the file
+   
+   f_write(&file,line,strlen(line),&len);                         // write it to the file
    printf("%s4 open returned %d \n\r",__FUNCTION__,stat);
-   f_sync(&file);
+   f_sync(&file);                                                 // since fatfs is caching opened file we force the write to be writen to the Card
    printf("%s5 open returned %d \n\r",__FUNCTION__,stat);
-   f_close(&file);
+   f_close(&file);                                               // close the file 
    printf("%s6 open returned %d \n\r",__FUNCTION__,stat);
 
    return 0;
